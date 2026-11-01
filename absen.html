@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="./assets/css/style.css" />
 </head>
 <body class="bg-slate-900 min-h-screen text-white antialiased pb-24">
 
@@ -26,7 +26,7 @@
   <!-- Header -->
   <header class="p-6 pb-2 max-w-md mx-auto flex items-center justify-between">
     <div class="flex items-center gap-3">
-      <a href="/index.html" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white active:scale-95 transition">
+      <a href="./index.html" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white active:scale-95 transition">
         <i class="fas fa-arrow-left"></i>
       </a>
       <img src="https://pradupta.my.id/img/logo.png" alt="Logo" class="w-9 h-9 object-contain drop-shadow" onerror="this.src='https://pradupta.github.io/web/img/logo.png'">
@@ -119,15 +119,15 @@
   <!-- Bottom Navigation Bar (STATIS & HANYA 3 IKON: Home, Berita, Absen) -->
   <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-2.5 z-40 shadow-lg">
     <div class="max-w-md mx-auto grid grid-cols-3 text-center">
-      <a href="/index.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-500 active:scale-90 transition-transform duration-150">
+      <a href="./index.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-500 active:scale-90 transition-transform duration-150">
         <i class="fas fa-home text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Home</span>
       </a>
-      <a href="/berita.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-500 active:scale-90 transition-transform duration-150">
+      <a href="./berita.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-500 active:scale-90 transition-transform duration-150">
         <i class="fas fa-newspaper text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Berita</span>
       </a>
-      <a href="/absen.html" class="flex flex-col items-center justify-center text-red-500 active:scale-90 transition-transform duration-150">
+      <a href="./absen.html" class="flex flex-col items-center justify-center text-red-500 active:scale-90 transition-transform duration-150">
         <i class="fas fa-camera text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Absen</span>
       </a>
@@ -135,7 +135,7 @@
   </nav>
 
   <script type="module">
-    import { db } from "/assets/js/firebase-config.js";
+    import { db } from "./assets/js/firebase-config.js";
     import { doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     let rosterConfig = {

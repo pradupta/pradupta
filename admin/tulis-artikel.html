@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
   <style>
     .editor-toolbar {
       background: #0f172a;
@@ -180,11 +180,11 @@
   </div>
 
   <script type="module">
-    import { protectAdminRoute } from "/admin/js/admin-auth.js";
-    import { renderAdminLayout } from "/admin/js/admin-app.js";
-    import { db } from "/assets/js/firebase-config.js";
+    import { protectAdminRoute } from "./js/admin-auth.js";
+    import { renderAdminLayout } from "./js/admin-app.js";
+    import { db } from "../assets/js/firebase-config.js";
     import { collection, addDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { compressImageFile, getQueryParam, formatDateIndo } from "/assets/js/utils.js";
+    import { compressImageFile, getQueryParam, formatDateIndo } from "../assets/js/utils.js";
 
     const { user, nama } = await protectAdminRoute();
     renderAdminLayout('tulis');
@@ -315,7 +315,7 @@
             title: 'Artikel Diperbarui!',
             text: 'Perubahan artikel berhasil disimpan.',
             confirmButtonColor: '#dc2626'
-          }).then(() => window.location.href = '/admin/kelola-berita.html');
+          }).then(() => window.location.href = './kelola-berita.html');
         } else {
           payload.views = 0;
           payload.createdAt = new Date().toISOString();
@@ -325,7 +325,7 @@
             title: 'Artikel Terbit!',
             text: 'Berita telah dipublikasikan ke portal ScoutDupta.',
             confirmButtonColor: '#dc2626'
-          }).then(() => window.location.href = '/admin/kelola-berita.html');
+          }).then(() => window.location.href = './kelola-berita.html');
         }
       } catch (err) {
         Swal.fire({

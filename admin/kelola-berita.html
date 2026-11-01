@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex antialiased">
 
@@ -24,7 +24,7 @@
           <h2 class="text-xl font-black text-white">Manajemen Berita & Artikel</h2>
           <p class="text-xs text-slate-400">Kelola seluruh publikasi kabar kegiatan Gerakan Pramuka ScoutDupta.</p>
         </div>
-        <a href="/admin/tulis-artikel.html" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/25 transition">
+        <a href="./tulis-artikel.html" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/25 transition">
           <i class="fas fa-plus"></i> Tulis Artikel Baru
         </a>
       </div>
@@ -66,11 +66,11 @@
   </div>
 
   <script type="module">
-    import { protectAdminRoute } from "/admin/js/admin-auth.js";
-    import { renderAdminLayout } from "/admin/js/admin-app.js";
-    import { db } from "/assets/js/firebase-config.js";
+    import { protectAdminRoute } from "./js/admin-auth.js";
+    import { renderAdminLayout } from "./js/admin-app.js";
+    import { db } from "../assets/js/firebase-config.js";
     import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { formatDateIndo } from "/assets/js/utils.js";
+    import { formatDateIndo } from "../assets/js/utils.js";
 
     await protectAdminRoute();
     renderAdminLayout('berita');
@@ -120,7 +120,7 @@
               <img src="${imgSrc}" class="w-12 h-12 object-cover rounded-xl bg-slate-800 border border-slate-700" onerror="this.src='https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=200'">
             </td>
             <td class="p-4 font-bold text-white max-w-xs">
-              <a href="/artikel-detail.html?id=${a.id}" target="_blank" class="hover:text-red-400 transition line-clamp-2">
+              <a href="../artikel-detail.html?id=${a.id}" target="_blank" class="hover:text-red-400 transition line-clamp-2">
                 ${a.judul}
               </a>
             </td>
@@ -134,10 +134,10 @@
             <td class="p-4 text-slate-400 whitespace-nowrap">${dateStr}</td>
             <td class="p-4 text-center">
               <div class="inline-flex items-center gap-1.5">
-                <a href="/artikel-detail.html?id=${a.id}" target="_blank" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="Lihat">
+                <a href="../artikel-detail.html?id=${a.id}" target="_blank" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="Lihat">
                   <i class="fas fa-eye text-xs"></i>
                 </a>
-                <a href="/admin/tulis-artikel.html?edit=${a.id}" class="p-2 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 transition" title="Edit">
+                <a href="./tulis-artikel.html?edit=${a.id}" class="p-2 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 transition" title="Edit">
                   <i class="fas fa-edit text-xs"></i>
                 </a>
                 <button onclick="hapusArtikel('${a.id}', '${a.judul.replace(/'/g, "\\'")}')" class="p-2 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 transition" title="Hapus">

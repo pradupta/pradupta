@@ -7,12 +7,12 @@ export function renderAdminLayout(activePage = 'dashboard') {
   const headerContainer = document.getElementById('admin-header');
 
   const navItems = [
-    { id: 'dashboard', label: 'Ringkasan', icon: 'fas fa-chart-pie', href: '/admin/dashboard.html' },
-    { id: 'berita', label: 'Kelola Berita', icon: 'fas fa-newspaper', href: '/admin/kelola-berita.html' },
-    { id: 'tulis', label: 'Tulis Artikel', icon: 'fas fa-pen-nib', href: '/admin/tulis-artikel.html' },
-    { id: 'absen', label: 'Presensi Realtime', icon: 'fas fa-fingerprint', href: '/admin/kelola-absen.html' },
-    { id: 'anggota', label: 'Data Anggota', icon: 'fas fa-users', href: '/admin/kelola-anggota.html' },
-    { id: 'proker', label: 'Dokumentasi Proker', icon: 'fas fa-images', href: '/admin/kelola-proker.html' },
+    { id: 'dashboard', label: 'Ringkasan', icon: 'fas fa-chart-pie', href: './dashboard.html' },
+    { id: 'berita', label: 'Kelola Berita', icon: 'fas fa-newspaper', href: './kelola-berita.html' },
+    { id: 'tulis', label: 'Tulis Artikel', icon: 'fas fa-pen-nib', href: './tulis-artikel.html' },
+    { id: 'absen', label: 'Presensi Realtime', icon: 'fas fa-fingerprint', href: './kelola-absen.html' },
+    { id: 'anggota', label: 'Data Anggota', icon: 'fas fa-users', href: './kelola-anggota.html' },
+    { id: 'proker', label: 'Dokumentasi Proker', icon: 'fas fa-images', href: './kelola-proker.html' },
   ];
 
   if (sidebarContainer) {
@@ -44,7 +44,7 @@ export function renderAdminLayout(activePage = 'dashboard') {
         }).join('')}
 
         <div class="pt-6 text-[10px] uppercase font-bold text-slate-500 px-3 mb-2 tracking-widest">Situs Publik</div>
-        <a href="/index.html" target="_blank" class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
+        <a href="../index.html" class="flex items-center gap-3 px-3.5 py-3 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800/60 transition-all">
           <i class="fas fa-external-link-alt w-5 text-center text-sm"></i>
           <span>Buka Beranda Publik</span>
         </a>

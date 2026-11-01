@@ -23,7 +23,7 @@ export function protectAdminRoute(allowedRoles = ['admin', 'author']) {
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         console.warn("Unauthenticated admin access attempt.");
-        window.location.replace('/admin/login.html?redirect=' + encodeURIComponent(window.location.pathname));
+        window.location.replace('./login.html?redirect=' + encodeURIComponent(window.location.pathname));
         return;
       }
 
@@ -47,7 +47,7 @@ export function protectAdminRoute(allowedRoles = ['admin', 'author']) {
 
       if (!allowedRoles.includes(role) && user.email !== 'hafidzsajili464@gmail.com') {
         alert("Akses Ditolak: Anda tidak memiliki wewenang untuk membuka Panel Admin.");
-        window.location.replace('/index.html');
+        window.location.replace('../index.html');
         return;
       }
 
@@ -73,7 +73,7 @@ export async function adminLogout() {
   if (confirm("Apakah Anda yakin ingin keluar dari Panel Admin?")) {
     await signOut(auth);
     localStorage.clear();
-    window.location.replace('/admin/login.html');
+    window.location.replace('./login.html');
   }
 }
 

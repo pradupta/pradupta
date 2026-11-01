@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="/assets/css/style.css" />
+  <link rel="stylesheet" href="../assets/css/style.css" />
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex antialiased">
 
@@ -150,9 +150,9 @@
   </div>
 
   <script type="module">
-    import { protectAdminRoute } from "/admin/js/admin-auth.js";
-    import { renderAdminLayout } from "/admin/js/admin-app.js";
-    import { db } from "/assets/js/firebase-config.js";
+    import { protectAdminRoute } from "./js/admin-auth.js";
+    import { renderAdminLayout } from "./js/admin-app.js";
+    import { db } from "../assets/js/firebase-config.js";
     import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
     await protectAdminRoute();

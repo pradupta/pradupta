@@ -10,7 +10,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <link rel="stylesheet" href="/assets/css/style.css">
+  <link rel="stylesheet" href="./assets/css/style.css">
   
   <style>
     .form-card { 
@@ -67,7 +67,7 @@
   <!-- Header -->
   <header class="text-center mb-8 max-w-4xl mx-auto">
     <div class="flex justify-between items-center mb-4">
-      <a href="/index.html" class="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-sm hover:bg-slate-100 transition">
+      <a href="./index.html" class="w-10 h-10 rounded-2xl bg-white border border-slate-200 flex items-center justify-center text-slate-700 shadow-sm hover:bg-slate-100 transition">
         <i class="fas fa-arrow-left"></i>
       </a>
       <span class="text-xs font-extrabold uppercase tracking-widest text-red-600 bg-red-50 px-3 py-1 rounded-full border border-red-100">
@@ -229,15 +229,15 @@
   <!-- Bottom Navigation Bar (STATIS & HANYA 3 IKON: Home, Berita, Absen) -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 py-2.5 z-40 shadow-lg">
     <div class="max-w-md mx-auto grid grid-cols-3 text-center">
-      <a href="/index.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
+      <a href="./index.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
         <i class="fas fa-home text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Home</span>
       </a>
-      <a href="/berita.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
+      <a href="./berita.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
         <i class="fas fa-newspaper text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Berita</span>
       </a>
-      <a href="/absen.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
+      <a href="./absen.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
         <i class="fas fa-camera text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Absen</span>
       </a>
@@ -245,9 +245,9 @@
   </nav>
 
   <script type="module">
-    import { db } from "/assets/js/firebase-config.js";
+    import { db } from "./assets/js/firebase-config.js";
     import { collection, addDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-    import { compressImageFile } from "/assets/js/utils.js";
+    import { compressImageFile } from "./assets/js/utils.js";
 
     // 1. Password Strength Logic
     const passInput = document.getElementById('password');
@@ -444,7 +444,7 @@
             text: 'Data Anda telah berhasil diproses oleh Dewan Kehormatan.',
             confirmButtonColor: '#dc2626'
           }).then(() => {
-            window.location.href = '/index.html';
+            window.location.href = './index.html';
           });
         };
 
