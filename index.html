@@ -14,10 +14,10 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <link rel="stylesheet" href="/assets/css/style.css" />
 </head>
-<body class="bg-slate-50 min-h-screen pb-24 text-slate-800 antialiased">
+<body class="bg-slate-50 min-h-screen pb-24 text-slate-800 antialiased select-none">
 
   <!-- Header Section -->
-  <header class="header-app p-6 pb-14 text-white">
+  <header class="header-app p-6 pb-12 text-white">
     <div class="max-w-md mx-auto flex justify-between items-center">
       <div>
         <p class="text-[11px] font-bold uppercase tracking-wider text-red-200">Selamat Datang di</p>
@@ -26,73 +26,68 @@
         </h1>
         <p class="text-[10px] text-red-100 font-medium">Pangkalan SMAN 20 Kab. Tangerang</p>
       </div>
-      <div class="flex items-center gap-3">
-        <a href="/login.html" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white text-sm transition" title="Akun Penulis/Admin">
-          <i class="fas fa-user-circle text-lg"></i>
-        </a>
-        <div class="w-12 h-12 bg-white rounded-2xl p-1.5 shadow-md flex items-center justify-center">
-          <i class="fas fa-campground text-2xl text-red-600"></i>
-        </div>
+      <div class="w-12 h-12 bg-white rounded-2xl p-1.5 shadow-md flex items-center justify-center shrink-0">
+        <i class="fas fa-campground text-2xl text-red-600"></i>
       </div>
     </div>
   </header>
 
   <!-- Main Content Area -->
-  <main class="max-w-md mx-auto px-4 -mt-8 space-y-6">
+  <main class="max-w-md mx-auto px-4 -mt-6 space-y-6">
 
-    <!-- Quick Navigation Grid -->
-    <div class="grid grid-cols-3 gap-3">
-      <button onclick="openAboutModal()" class="menu-card p-4 flex flex-col items-center group">
-        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-sm">
-          <i class="fas fa-info-circle text-xl"></i>
+    <!-- Quick Navigation Grid (HANYA 5 Shortcut Publik dengan Animasi Scale Down) -->
+    <div class="grid grid-cols-5 gap-2 sm:gap-3">
+      
+      <!-- 1. About -->
+      <button type="button" onclick="openAboutModal()" class="menu-card p-2 sm:p-3 flex flex-col items-center justify-center text-center active:scale-90 transition-transform duration-150 shadow-sm cursor-pointer border border-slate-100">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-1.5 shadow-sm">
+          <i class="fas fa-info-circle text-lg sm:text-xl"></i>
         </div>
-        <span class="text-[11px] font-extrabold uppercase tracking-tight text-slate-700">Tentang</span>
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-tight text-slate-700">About</span>
       </button>
 
-      <a href="/berita.html" class="menu-card p-4 flex flex-col items-center group">
-        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-sm">
-          <i class="fas fa-newspaper text-xl"></i>
+      <!-- 2. Berita -->
+      <a href="/berita.html" class="menu-card p-2 sm:p-3 flex flex-col items-center justify-center text-center active:scale-90 transition-transform duration-150 shadow-sm cursor-pointer border border-slate-100">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-1.5 shadow-sm">
+          <i class="fas fa-newspaper text-lg sm:text-xl"></i>
         </div>
-        <span class="text-[11px] font-extrabold uppercase tracking-tight text-slate-700">Berita</span>
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-tight text-slate-700">Berita</span>
       </a>
 
-      <a href="/proker.html" class="menu-card p-4 flex flex-col items-center group">
-        <div class="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-sm">
-          <i class="fas fa-images text-xl"></i>
+      <!-- 3. Proker -->
+      <a href="/proker.html" class="menu-card p-2 sm:p-3 flex flex-col items-center justify-center text-center active:scale-90 transition-transform duration-150 shadow-sm cursor-pointer border border-slate-100">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center mb-1.5 shadow-sm">
+          <i class="fas fa-images text-lg sm:text-xl"></i>
         </div>
-        <span class="text-[11px] font-extrabold uppercase tracking-tight text-slate-700">Proker</span>
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-tight text-slate-700">Proker</span>
       </a>
 
-      <a href="/absen.html" class="menu-card p-4 flex flex-col items-center group">
-        <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-sm">
-          <i class="fas fa-camera-retro text-xl"></i>
+      <!-- 4. Absen -->
+      <a href="/absen.html" class="menu-card p-2 sm:p-3 flex flex-col items-center justify-center text-center active:scale-90 transition-transform duration-150 shadow-sm cursor-pointer border border-slate-100">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-1.5 shadow-sm">
+          <i class="fas fa-camera-retro text-lg sm:text-xl"></i>
         </div>
-        <span class="text-[11px] font-extrabold uppercase tracking-tight text-slate-700">Absen</span>
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-tight text-slate-700">Absen</span>
       </a>
 
-      <a href="/daftar.html" class="menu-card p-4 flex flex-col items-center group">
-        <div class="w-12 h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-sm">
-          <i class="fas fa-user-plus text-xl"></i>
+      <!-- 5. Daftar -->
+      <a href="/daftar.html" class="menu-card p-2 sm:p-3 flex flex-col items-center justify-center text-center active:scale-90 transition-transform duration-150 shadow-sm cursor-pointer border border-slate-100">
+        <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 text-emerald-600 rounded-2xl flex items-center justify-center mb-1.5 shadow-sm">
+          <i class="fas fa-user-plus text-lg sm:text-xl"></i>
         </div>
-        <span class="text-[11px] font-extrabold uppercase tracking-tight text-slate-700">Daftar</span>
+        <span class="text-[10px] sm:text-xs font-black uppercase tracking-tight text-slate-700">Daftar</span>
       </a>
 
-      <a href="/login.html" class="menu-card p-4 flex flex-col items-center group">
-        <div class="w-12 h-12 bg-teal-100 text-teal-600 rounded-2xl flex items-center justify-center mb-2 group-hover:scale-105 transition-transform shadow-sm">
-          <i class="fas fa-pen-nib text-xl"></i>
-        </div>
-        <span class="text-[11px] font-extrabold uppercase tracking-tight text-slate-700">Artikel</span>
-      </a>
     </div>
 
-    <!-- Active Banner -->
+    <!-- Active Banner Presensi -->
     <div class="bg-gradient-to-r from-red-600 to-rose-600 rounded-3xl p-5 text-white shadow-lg shadow-red-600/15 flex items-center justify-between">
       <div>
         <span class="px-2.5 py-0.5 rounded-full text-[9px] font-extrabold bg-white/20 text-white uppercase tracking-wider">Presensi Online</span>
         <h3 class="font-extrabold text-base mt-1">Presensi Kegiatan Pramuka</h3>
         <p class="text-xs text-red-100 mt-0.5">Catat kehadiran dengan kamera selfie & GPS real-time.</p>
       </div>
-      <a href="/absen.html" class="px-4 py-2.5 bg-white text-red-600 font-black text-xs rounded-xl shadow-md active:scale-95 transition-transform whitespace-nowrap">
+      <a href="/absen.html" class="px-4 py-2.5 bg-white text-red-600 font-black text-xs rounded-xl shadow-md active:scale-90 transition-transform whitespace-nowrap">
         Buka <i class="fas fa-arrow-right ml-1"></i>
       </a>
     </div>
@@ -147,34 +142,31 @@
         <p><b>Visi:</b> Menjadikan anggota Pramuka SMAN 20 Kabupaten Tangerang berkarakter unggul, disiplin, berilmu, dan berjiwa ksatria pengabdi bangsa.</p>
         <p><b>Misi:</b> Menyelenggarakan pendidikan kepramukaan berkualitas, melatih kecakapan hidup (life skills), menumbuhkan semangat persaudaraan, dan mengabdi untuk kemaslahatan masyarakat.</p>
       </div>
-      <button onclick="closeAboutModal()" class="w-full py-3 bg-slate-900 text-white font-bold text-xs rounded-xl">
+      <button onclick="closeAboutModal()" class="w-full py-3 bg-slate-900 text-white font-bold text-xs rounded-xl active:scale-95 transition-transform">
         Tutup
       </button>
     </div>
   </div>
 
-  <!-- Bottom Navigation Bar -->
+  <!-- Bottom Navigation Bar (STATIS & HANYA 3 IKON: Home, Berita, Absen) -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 py-2.5 z-40 shadow-lg">
-    <div class="max-w-md mx-auto flex justify-around">
-      <a href="/index.html" class="flex flex-col items-center text-red-600">
+    <div class="max-w-md mx-auto grid grid-cols-3 text-center">
+      <!-- 1. Home -->
+      <a href="/index.html" class="flex flex-col items-center justify-center text-red-600 active:scale-90 transition-transform duration-150">
         <i class="fas fa-home text-lg"></i>
-        <span class="text-[10px] font-extrabold mt-0.5">Beranda</span>
+        <span class="text-[10px] font-extrabold mt-0.5">Home</span>
       </a>
-      <a href="/berita.html" class="flex flex-col items-center text-slate-400 hover:text-red-600 transition">
+      
+      <!-- 2. Berita -->
+      <a href="/berita.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
         <i class="fas fa-newspaper text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Berita</span>
       </a>
-      <a href="/absen.html" class="flex flex-col items-center text-slate-400 hover:text-red-600 transition">
+      
+      <!-- 3. Absen -->
+      <a href="/absen.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
         <i class="fas fa-camera text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Absen</span>
-      </a>
-      <a href="/proker.html" class="flex flex-col items-center text-slate-400 hover:text-red-600 transition">
-        <i class="fas fa-images text-lg"></i>
-        <span class="text-[10px] font-extrabold mt-0.5">Proker</span>
-      </a>
-      <a href="/daftar.html" class="flex flex-col items-center text-slate-400 hover:text-red-600 transition">
-        <i class="fas fa-user-plus text-lg"></i>
-        <span class="text-[10px] font-extrabold mt-0.5">Daftar</span>
       </a>
     </div>
   </nav>
@@ -208,7 +200,7 @@
         const imgSrc = item.gambar_url || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=300";
 
         html += `
-          <a href="/artikel-detail.html?id=${doc.id}" class="p-3 bg-white rounded-2xl flex gap-3 shadow-sm border border-slate-100 hover:border-red-200 transition-all group">
+          <a href="/artikel-detail.html?id=${doc.id}" class="p-3 bg-white rounded-2xl flex gap-3 shadow-sm border border-slate-100 hover:border-red-200 active:scale-95 transition-all group">
             <img src="${imgSrc}" class="w-20 h-20 object-cover rounded-xl shrink-0 bg-slate-100 group-hover:scale-105 transition-transform" onerror="this.src='https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=300'" loading="lazy">
             <div class="flex-1 flex flex-col justify-between py-0.5">
               <div>

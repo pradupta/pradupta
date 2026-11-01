@@ -223,28 +223,20 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation Bar -->
+  <!-- Bottom Navigation Bar (STATIS & HANYA 3 IKON: Home, Berita, Absen) -->
   <nav class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 py-2.5 z-40 shadow-lg">
-    <div class="max-w-md mx-auto flex justify-around">
-      <a href="/index.html" class="flex flex-col items-center text-slate-400 hover:text-red-600 transition">
+    <div class="max-w-md mx-auto grid grid-cols-3 text-center">
+      <a href="/index.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
         <i class="fas fa-home text-lg"></i>
-        <span class="text-[10px] font-extrabold mt-0.5">Beranda</span>
+        <span class="text-[10px] font-extrabold mt-0.5">Home</span>
       </a>
-      <a href="/berita.html" class="flex flex-col items-center text-slate-400 hover:text-red-600 transition">
+      <a href="/berita.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
         <i class="fas fa-newspaper text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Berita</span>
       </a>
-      <a href="/absen.html" class="flex flex-col items-center text-slate-400 hover:text-red-600 transition">
+      <a href="/absen.html" class="flex flex-col items-center justify-center text-slate-400 hover:text-red-600 active:scale-90 transition-transform duration-150">
         <i class="fas fa-camera text-lg"></i>
         <span class="text-[10px] font-extrabold mt-0.5">Absen</span>
-      </a>
-      <a href="/proker.html" class="flex flex-col items-center text-slate-400 hover:text-red-600 transition">
-        <i class="fas fa-images text-lg"></i>
-        <span class="text-[10px] font-extrabold mt-0.5">Proker</span>
-      </a>
-      <a href="/daftar.html" class="flex flex-col items-center text-red-600">
-        <i class="fas fa-user-plus text-lg"></i>
-        <span class="text-[10px] font-extrabold mt-0.5">Daftar</span>
       </a>
     </div>
   </nav>
@@ -443,7 +435,14 @@
         startCountdownTimer();
 
         document.getElementById('btn-lihat-biodata').onclick = () => {
-          window.location.href = `/admin/kelola-anggota.html?id=${newlyCreatedRegId}`;
+          Swal.fire({
+            icon: 'success',
+            title: 'Biodata Tersimpan',
+            text: 'Data Anda telah berhasil diproses oleh Dewan Kehormatan.',
+            confirmButtonColor: '#dc2626'
+          }).then(() => {
+            window.location.href = '/index.html';
+          });
         };
 
       } catch (err) {
