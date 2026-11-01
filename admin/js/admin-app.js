@@ -19,9 +19,7 @@ export function renderAdminLayout(activePage = 'dashboard') {
     sidebarContainer.innerHTML = `
       <div class="p-6 border-b border-slate-800 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 to-rose-500 flex items-center justify-center text-white font-bold text-lg shadow-lg shadow-red-600/30">
-            <i class="fas fa-shield-alt"></i>
-          </div>
+          <img src="https://pradupta.my.id/img/logo.png" alt="Logo" class="w-10 h-10 object-contain drop-shadow" onerror="this.src='https://pradupta.github.io/web/img/logo.png'">
           <div>
             <h1 class="font-extrabold text-white text-base tracking-tight">ScoutDupta</h1>
             <p class="text-[10px] text-red-400 font-bold uppercase tracking-wider">Admin Control Panel</p>

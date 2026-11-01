@@ -73,7 +73,7 @@ export async function seedInitialDataIfEmpty() {
       // Initial Articles
       await addDoc(articlesCol, {
         judul: "Penerimaan Tamu Ambalan (PTA) SMAN 20 Kab. Tangerang Tahun 2026",
-        isi_html: `<p>Kegiatan Penerimaan Tamu Ambalan (PTA) Pangkalan SMAN 20 Kabupaten Tangerang Ambalan Raden Fatah - Cut Nyak Dien berlangsung dengan penuh khidmat dan semangat kebersamaan.</p>
+        isi_html: `<p>Kegiatan Penerimaan Tamu Ambalan (PTA) Pangkalan SMAN 20 Kabupaten Tangerang Ambalan Raden Aria Wangsakara - Nyimas Melati berlangsung dengan penuh khidmat dan semangat kebersamaan.</p>
         <p>Kegiatan ini bertujuan untuk menyambut adik-adik penggalang yang beralih ke jenjang penegak, serta membentuk karakter disiplin, mandiri, berakhlak mulia, dan berjiwa ksatria sesuai dengan Tri Satya dan Dasa Darma Pramuka.</p>
         <p>Adapun rangkaian kegiatan meliputi upacara adat ambalan, materi kepenagakan, pioneering, penjelajahan halang rintang, serta api unggun persaudaraan.</p>`,
         penulis: "Hafidz Sajili (Pembina)",
