@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Login Anggota & Penulis - ScoutDupta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body class="bg-slate-100 min-h-screen flex items-center justify-center p-4 text-slate-800 antialiased">
+
+  <div class="bg-white p-6 sm:p-8 rounded-3xl shadow-xl w-full max-w-md border-t-8 border-red-600 relative">
+    
+    <a href="/index.html" class="absolute top-4 left-4 text-slate-400 hover:text-slate-600 p-2 text-sm">
+      <i class="fas fa-arrow-left mr-1"></i> Beranda
+    </a>
+
+    <div class="text-center mb-6 pt-3">
+      <div class="w-16 h-16 bg-red-100 text-red-600 rounded-3xl mx-auto mb-3 flex items-center justify-center text-2xl shadow-inner">
+        <i class="fas fa-campground"></i>
+      </div>
+      <h1 class="text-xl font-black text-slate-900 tracking-tight">Akun <span class="text-red-600">ScoutDupta</span></h1>
+      <p class="text-xs text-slate-400 mt-0.5">Masuk untuk menulis artikel atau mengelola sistem</p>
+    </div>
+
+    <!-- Tab switcher (Masuk / Daftar Akun) -->
+    <div class="flex border-b border-slate-200 mb-5">
+      <button onclick="switchTab('login')" id="tab-login" class="flex-1 py-2 text-xs font-black border-b-2 border-red-600 text-red-600">
+        MASUK
+      </button>
+      <button onclick="switchTab('register')" id="tab-register" class="flex-1 py-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600">
+        BUAT AKUN
+      </button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="loginForm" class="space-y-4">
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1 ml-1">Email</label>
+        <div class="relative">
+          <i class="fas fa-envelope absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+          <input type="email" id="loginEmail" class="form-input pl-10 text-xs" placeholder="nama@email.com" required>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1 ml-1">Password</label>
+        <div class="relative">
+          <i class="fas fa-lock absolute left-3.5 top-3.5 text-slate-400 text-xs"></i>
+          <input type="password" id="loginPassword" class="form-input pl-10 pr-10 text-xs" placeholder="••••••••" required>
+          <button type="button" onclick="togglePass('loginPassword', 'eye-login')" class="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600">
+            <i class="fas fa-eye text-xs" id="eye-login"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" id="btn-login-submit" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-red-600/25 active:scale-95 transition">
+        Masuk Akun
+      </button>
+    </form>
+
+    <!-- Register Form -->
+    <form id="registerForm" class="space-y-3 hidden">
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1 ml-1">Nama Lengkap</label>
+        <input type="text" id="regName" class="form-input text-xs" placeholder="Nama lengkap Anda" required>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1 ml-1">Email</label>
+        <input type="email" id="regEmail" class="form-input text-xs" placeholder="nama@email.com" required>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1 ml-1">No. WhatsApp</label>
+        <input type="tel" id="regPhone" class="form-input text-xs" placeholder="08xxxxxxxxxx" required>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1 ml-1">Password</label>
+        <input type="password" id="regPassword" class="form-input text-xs" placeholder="Min. 8 karakter" minlength="8" required>
+      </div>
+
+      <button type="submit" id="btn-reg-submit" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-red-600/25 active:scale-95 transition">
+        Daftar Penulis
+      </button>
+    </form>
+
+    <!-- Google Login Divider -->
+    <div class="relative my-6 text-center">
+      <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+      <span class="relative px-3 bg-white text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Atau masuk dengan</span>
+    </div>
+
+    <button type="button" id="btn-google-login" class="w-full py-3 bg-white border border-slate-200 hover:bg-slate-50 rounded-2xl text-xs font-bold text-slate-700 flex items-center justify-center gap-2 shadow-sm active:scale-95 transition">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4" alt="Google">
+      <span>Masuk Menggunakan Google</span>
+    </button>
+
+    <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+      <p class="text-[11px] text-slate-400">
+        Khusus Administrator Pangkalan? <a href="/admin/login.html" class="text-red-600 font-bold hover:underline">Masuk Panel Admin</a>
+      </p>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { loginWithEmail, registerWithEmail, loginWithGoogle } from "/assets/js/auth.js";
+
+    window.switchTab = (tab) => {
+      const loginForm = document.getElementById('loginForm');
+      const regForm = document.getElementById('registerForm');
+      const tabLogin = document.getElementById('tab-login');
+      const tabReg = document.getElementById('tab-register');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        regForm.classList.add('hidden');
+        tabLogin.className = 'flex-1 py-2 text-xs font-black border-b-2 border-red-600 text-red-600';
+        tabReg.className = 'flex-1 py-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600';
+      } else {
+        loginForm.classList.add('hidden');
+        regForm.classList.remove('hidden');
+        tabReg.className = 'flex-1 py-2 text-xs font-black border-b-2 border-red-600 text-red-600';
+        tabLogin.className = 'flex-1 py-2 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-600';
+      }
+    };
+
+    window.togglePass = (inputId, eyeId) => {
+      const input = document.getElementById(inputId);
+      const eye = document.getElementById(eyeId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        eye.className = 'fas fa-eye-slash text-xs';
+      } else {
+        input.type = 'password';
+        eye.className = 'fas fa-eye text-xs';
+      }
+    };
+
+    document.getElementById('loginForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-login-submit');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Memverifikasi...';
+
+      const email = document.getElementById('loginEmail').value.trim();
+      const pass = document.getElementById('loginPassword').value;
+
+      try {
+        const user = await loginWithEmail(email, pass);
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Berhasil',
+          text: `Selamat datang kembali, ${user.displayName || email}!`,
+          confirmButtonColor: '#dc2626',
+          timer: 1500,
+          timerProgressBar: true
+        }).then(() => {
+          if (email === 'hafidzsajili464@gmail.com') {
+            window.location.replace('/admin/dashboard.html');
+          } else {
+            window.location.replace('/admin/tulis-artikel.html');
+          }
+        });
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Masuk',
+          text: err.message,
+          confirmButtonColor: '#dc2626'
+        });
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Masuk Akun';
+      }
+    };
+
+    document.getElementById('registerForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-reg-submit');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Mendaftarkan...';
+
+      const name = document.getElementById('regName').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const pass = document.getElementById('regPassword').value;
+
+      try {
+        await registerWithEmail(email, pass, name, phone);
+        Swal.fire({
+          icon: 'success',
+          title: 'Pendaftaran Akun Berhasil',
+          text: 'Akun penulis Anda telah dibuat. Silakan mulai berkarya!',
+          confirmButtonColor: '#dc2626'
+        }).then(() => {
+          window.location.replace('/admin/tulis-artikel.html');
+        });
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Pendaftaran Gagal',
+          text: err.message,
+          confirmButtonColor: '#dc2626'
+        });
+      } finally {
+        btn.disabled = false;
+        btn.innerText = 'Daftar Penulis';
+      }
+    };
+
+    document.getElementById('btn-google-login').onclick = async () => {
+      try {
+        const user = await loginWithGoogle();
+        Swal.fire({
+          icon: 'success',
+          title: 'Login Google Berhasil',
+          text: `Halo ${user.displayName}!`,
+          confirmButtonColor: '#dc2626',
+          timer: 1500,
+          timerProgressBar: true
+        }).then(() => {
+          if (user.email === 'hafidzsajili464@gmail.com') {
+            window.location.replace('/admin/dashboard.html');
+          } else {
+            window.location.replace('/admin/tulis-artikel.html');
+          }
+        });
+      } catch (err) {
+        console.warn("Google sign-in:", err);
+      }
+    };
+  </script>
+</body>
+</html>

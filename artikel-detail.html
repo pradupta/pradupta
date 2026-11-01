@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Detail Artikel - ScoutDupta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <style>
+    .article-content p {
+      margin-bottom: 1.1rem;
+      line-height: 1.8;
+      color: #334155;
+      font-size: 0.95rem;
+      text-align: justify;
+    }
+    .article-content ul, .article-content ol {
+      margin-left: 1.5rem;
+      margin-bottom: 1rem;
+      color: #334155;
+    }
+    .article-content li {
+      margin-bottom: 0.4rem;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen pb-20 text-slate-800 antialiased">
+
+  <!-- Header -->
+  <header class="header-app p-6 pb-6 text-white sticky top-0 z-30 shadow-md">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <a href="/berita.html" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white active:scale-95 transition">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <h2 class="text-sm font-extrabold uppercase tracking-widest text-red-100">Baca Kabar Dupta</h2>
+      <button onclick="shareArticle()" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white active:scale-95 transition" title="Bagikan">
+        <i class="fas fa-share-alt"></i>
+      </button>
+    </div>
+  </header>
+
+  <main class="max-w-md mx-auto px-4 py-4 space-y-4">
+
+    <!-- Loading State -->
+    <div id="loading-box" class="p-8 text-center bg-white rounded-3xl shadow-sm border border-slate-100 space-y-4">
+      <div class="w-10 h-10 border-4 border-red-200 border-t-red-600 rounded-full animate-spin mx-auto"></div>
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Memuat Artikel...</p>
+    </div>
+
+    <!-- Article Container -->
+    <article id="article-box" class="hidden bg-white p-5 rounded-3xl shadow-sm border border-slate-100 space-y-4">
+      
+      <div>
+        <span id="art-category" class="inline-block text-[10px] font-black uppercase px-2.5 py-1 rounded-lg bg-red-50 text-red-600 mb-2">Kegiatan</span>
+        <h1 id="art-title" class="text-xl font-black text-slate-900 leading-snug"></h1>
+      </div>
+
+      <!-- Metadata -->
+      <div class="flex flex-wrap items-center gap-3 py-2 border-y border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+        <span><i class="far fa-calendar-alt text-red-600 mr-1.5"></i><span id="art-date">-</span></span>
+        <span><i class="far fa-user text-red-600 mr-1.5"></i><span id="art-author">-</span></span>
+        <span><i class="far fa-eye text-red-600 mr-1.5"></i><span id="art-views">0</span> DILIHAT</span>
+      </div>
+
+      <!-- Featured Image -->
+      <div class="rounded-2xl overflow-hidden bg-slate-100 border border-slate-100 shadow-sm max-h-72">
+        <img id="art-image" src="" alt="Thumbnail" class="w-full h-full object-cover" onerror="this.classList.add('hidden')">
+      </div>
+
+      <!-- Article Body -->
+      <div id="art-body" class="article-content pt-2"></div>
+
+      <!-- PDF Document Embed Container -->
+      <div id="pdf-container" class="hidden mt-6 pt-4 border-t border-slate-200">
+        <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-800 mb-3 flex items-center gap-2">
+          <i class="fas fa-file-pdf text-red-600 text-sm"></i> Dokumen Lampiran Berkas
+        </h3>
+        <div class="relative w-full overflow-hidden rounded-2xl border border-slate-200 shadow-sm" style="padding-top: 130%; height: 0;">
+          <iframe id="pdf-iframe" src="" class="absolute inset-0 w-full h-full border-none" allow="autoplay"></iframe>
+        </div>
+        <p class="mt-2 text-[10px] text-slate-400 italic text-center">*Jika pratinjau dokumen tidak muncul, pastikan Anda telah masuk ke Akun Google.</p>
+      </div>
+
+      <!-- Share Action Footer -->
+      <div class="pt-6 border-t border-slate-100 flex items-center justify-between">
+        <span class="text-xs font-bold text-slate-500">Bagikan kabar ini:</span>
+        <div class="flex gap-2">
+          <button onclick="shareWhatsApp()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-2 shadow-sm transition">
+            <i class="fab fa-whatsapp"></i> WhatsApp
+          </button>
+          <button onclick="shareArticle()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+            <i class="fas fa-share-nodes"></i>
+          </button>
+        </div>
+      </div>
+
+    </article>
+
+  </main>
+
+  <script type="module">
+    import { db } from "/assets/js/firebase-config.js";
+    import { doc, getDoc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { formatDateIndo, getQueryParam, shareContent } from "/assets/js/utils.js";
+
+    const articleId = getQueryParam('id') || getQueryParam('news');
+    let currentArticleData = null;
+
+    if (!articleId) {
+      window.location.replace('/berita.html');
+    } else {
+      loadArticle(articleId);
+    }
+
+    async function loadArticle(id) {
+      try {
+        const docRef = doc(db, "articles", id);
+        const docSnap = await getDoc(docRef);
+
+        if (!docSnap.exists()) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Artikel Tidak Ditemukan',
+            text: 'Artikel ini mungkin telah dihapus atau link tidak valid.',
+            confirmButtonColor: '#dc2626'
+          }).then(() => window.location.replace('/berita.html'));
+          return;
+        }
+
+        currentArticleData = docSnap.data();
+
+        // Populate fields
+        document.getElementById('art-title').innerText = currentArticleData.judul;
+        document.getElementById('art-category').innerText = currentArticleData.kategori || 'Kabar';
+        document.getElementById('art-date').innerText = formatDateIndo(currentArticleData.createdAt);
+        document.getElementById('art-author').innerText = currentArticleData.penulis || 'Admin';
+        document.getElementById('art-views').innerText = (currentArticleData.views || 0) + 1;
+
+        if (currentArticleData.gambar_url) {
+          const imgEl = document.getElementById('art-image');
+          imgEl.src = currentArticleData.gambar_url;
+          imgEl.classList.remove('hidden');
+        }
+
+        document.getElementById('art-body').innerHTML = currentArticleData.isi_html || '';
+
+        // Check for PDF or "Arah Kebijakan" document
+        const pdfContainer = document.getElementById('pdf-container');
+        const pdfIframe = document.getElementById('pdf-iframe');
+        
+        let pdfUrl = currentArticleData.pdf_url;
+        if (!pdfUrl && currentArticleData.judul && currentArticleData.judul.toLowerCase().includes('arah kebijakan')) {
+          pdfUrl = "https://drive.google.com/file/d/1iGIOK7EmnnUkQYiOwfqep_diOcb_hH5y/preview";
+        }
+
+        if (pdfUrl) {
+          pdfIframe.src = pdfUrl.replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+          pdfContainer.classList.remove('hidden');
+        }
+
+        document.getElementById('loading-box').classList.add('hidden');
+        document.getElementById('article-box').classList.remove('hidden');
+
+        // Atomically increment views in Firestore
+        try {
+          await updateDoc(docRef, {
+            views: increment(1)
+          });
+        } catch (e) {
+          console.warn("View counter background update:", e);
+        }
+
+      } catch (err) {
+        console.error("Error loading article:", err);
+      }
+    }
+
+    window.shareArticle = () => {
+      if (!currentArticleData) return;
+      const shareUrl = window.location.href;
+      shareContent({
+        title: currentArticleData.judul,
+        text: `📢 *BERITA SCOUT DUPTA* 📢\n\n"${currentArticleData.judul}"\n\nBaca selengkapnya di sini:`,
+        url: shareUrl
+      });
+    };
+
+    window.shareWhatsApp = () => {
+      if (!currentArticleData) return;
+      const shareUrl = window.location.href;
+      const text = `📢 *BERITA SCOUT DUPTA* 📢\n\n"${currentArticleData.judul}"\n\nBaca selengkapnya di sini:\n${shareUrl}`;
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+    };
+  </script>
+</body>
+</html>

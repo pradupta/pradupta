@@ -1,0 +1,9 @@
+{
+  "name": "ScoutDupta - Portal Pramuka SMAN 20 Kab. Tangerang",
+  "description": "Sistem informasi kepramukaan ScoutDupta dengan fitur Presensi GPS & Kamera Selfie, Berita & Artikel, Pendaftaran Anggota, Galeri Proker, dan Panel Admin Real-time Firestore.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

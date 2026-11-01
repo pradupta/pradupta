@@ -1,0 +1,150 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile document",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "nama_lengkap": { "type": "string" },
+        "no_wa": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "author", "member"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["uid", "email", "nama_lengkap", "role"]
+    },
+    "Admin": {
+      "title": "Admin",
+      "description": "Admin identifier document",
+      "type": "object",
+      "properties": {
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["email", "role"]
+    },
+    "Article": {
+      "title": "Article",
+      "description": "News and ScoutDupta information article",
+      "type": "object",
+      "properties": {
+        "judul": { "type": "string", "maxLength": 300 },
+        "isi_html": { "type": "string" },
+        "penulis": { "type": "string", "maxLength": 100 },
+        "authorId": { "type": "string" },
+        "gambar_url": { "type": "string" },
+        "views": { "type": "number" },
+        "kategori": { "type": "string" },
+        "pdf_url": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["judul", "isi_html", "penulis"]
+    },
+    "Attendance": {
+      "title": "Attendance",
+      "description": "Digital attendance check-in record",
+      "type": "object",
+      "properties": {
+        "user_name": { "type": "string", "maxLength": 100 },
+        "divisi": { "type": "string", "maxLength": 100 },
+        "status": { "type": "string", "enum": ["Hadir", "Sakit", "Izin", "Alpa", "Terlambat"] },
+        "lat": { "type": "number" },
+        "lng": { "type": "number" },
+        "foto_wajah_url": { "type": "string" },
+        "keterangan": { "type": "string" },
+        "timestamp": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["user_name", "divisi", "status"]
+    },
+    "Registration": {
+      "title": "Registration",
+      "description": "New member registration application",
+      "type": "object",
+      "properties": {
+        "nama_singkat": { "type": "string", "maxLength": 50 },
+        "nama_lengkap": { "type": "string", "maxLength": 150 },
+        "jenis_kelamin": { "type": "string", "enum": ["Laki-laki", "Perempuan"] },
+        "agama": { "type": "string" },
+        "tempat_lahir": { "type": "string" },
+        "tanggal_lahir": { "type": "string" },
+        "provinsi": { "type": "string" },
+        "kabkota": { "type": "string" },
+        "kecamatan": { "type": "string" },
+        "kelurahan": { "type": "string" },
+        "kode_pos": { "type": "string" },
+        "alamat_lengkap": { "type": "string" },
+        "kelas": { "type": "string" },
+        "email": { "type": "string" },
+        "no_wa": { "type": "string" },
+        "hobi": { "type": "string" },
+        "cita_cita": { "type": "string" },
+        "motto": { "type": "string" },
+        "alasan": { "type": "string" },
+        "foto_base64": { "type": "string" },
+        "status": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["nama_singkat", "nama_lengkap", "jenis_kelamin", "email", "no_wa"]
+    },
+    "Proker": {
+      "title": "Proker",
+      "description": "Work program activity album and photo documentation",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "maxLength": 200 },
+        "cover": { "type": "string" },
+        "description": { "type": "string" },
+        "photos": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["name"]
+    },
+    "Config": {
+      "title": "Config",
+      "description": "School attendance divisions and students list configuration",
+      "type": "object",
+      "properties": {
+        "school": { "type": "string" },
+        "classes": { "type": "array" },
+        "students": { "type": "array" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["school"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and credentials"
+    },
+    "/admins/{adminId}": {
+      "schema": "Admin",
+      "description": "Registered system administrators"
+    },
+    "/articles/{articleId}": {
+      "schema": "Article",
+      "description": "Published articles and news feeds"
+    },
+    "/attendance/{attendanceId}": {
+      "schema": "Attendance",
+      "description": "Attendance logs and photos"
+    },
+    "/registrations/{regId}": {
+      "schema": "Registration",
+      "description": "Prospective member registrations"
+    },
+    "/proker/{prokerId}": {
+      "schema": "Proker",
+      "description": "Program kerja albums and media"
+    },
+    "/config/{configId}": {
+      "schema": "Config",
+      "description": "Application settings and master roster"
+    }
+  }
+}

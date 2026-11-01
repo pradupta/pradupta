@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Absensi PRADUPTA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        :root { --accent-red: #dc2626; --glass-bg: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 255, 255, 0.1); }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; background: #000;
+            background-image: linear-gradient(rgba(0,0,0,0.75), rgba(0,0,0,0.75)), url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=2070');
+            background-size: cover; background-position: center; background-attachment: fixed; color: #fff; min-height: 100vh;
+        }
+        .glass-card { background: var(--glass-bg); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid var(--glass-border); border-radius: 1.5rem; }
+        select, input, textarea { background: rgba(255, 255, 255, 0.08) !important; border: 1px solid rgba(255, 255, 255, 0.1) !important; color: white !important; border-radius: 12px !important; outline: none !important; }
+        select:focus { border-color: var(--accent-red) !important; }
+        .camera-box { border-radius: 1rem; overflow: hidden; background: #000; aspect-ratio: 4/3; position: relative; border: 1px solid rgba(255,255,255,0.1); }
+        #video { width: 100%; height: 100%; object-fit: cover; }
+        .mirror { transform: scaleX(-1); }
+        #map { height: 140px; border-radius: 1rem; width: 100%; filter: grayscale(1) invert(1) opacity(0.6); border: 1px solid rgba(255,255,255,0.1); }
+        .btn-primary { background: var(--accent-red); color: white; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px; transition: all 0.3s ease; }
+        #loader { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.85); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 3px solid rgba(220, 38, 38, 0.2); border-top: 3px solid var(--accent-red); border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .hidden-element { display: none !important; }
+        select option { background: #1a1a1a; color: #fff; }
+    </style>
+</head>
+<body class="antialiased">
+    <div id="loader">
+        <div class="spinner"></div>
+        <p class="mt-4 text-[10px] font-bold tracking-[0.4em] text-red-500 uppercase">Processing</p>
+    </div>
+
+    <header class="max-w-md mx-auto p-6">
+        <h1 id="display-school" class="font-extrabold text-white text-xl tracking-tighter italic uppercase">PRADUPTA</h1>
+        <p class="text-[9px] text-red-500 font-bold uppercase tracking-[0.3em]">Smart Attendance</p>
+    </header>
+
+    <main class="max-w-md mx-auto p-4 space-y-4 pb-20">
+        <div class="glass-card p-6 space-y-4">
+            <div class="space-y-1">
+                <label class="text-[9px] font-bold text-zinc-500 uppercase ml-1">Pilih Divisi</label>
+                <select id="class-select" onchange="filterSiswa()" class="w-full p-3 text-xs font-semibold"></select>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[9px] font-bold text-zinc-500 uppercase ml-1">Nama Anggota</label>
+                <select id="student-select" class="w-full p-3 text-xs font-semibold"></select>
+            </div>
+            <div class="space-y-1">
+                <label class="text-[9px] font-bold text-zinc-500 uppercase ml-1">Status Kehadiran</label>
+                <select id="status-select" onchange="toggleCam()" class="w-full p-3 text-xs font-black text-red-500">
+                    <option value="Hadir">HADIR (Wajib Foto)</option>
+                    <option value="Sakit">SAKIT</option>
+                    <option value="Izin">IZIN</option>
+                    <option value="Alpa">ALPA</option>
+                    <option value="Terlambat">TERLAMBAT</option>
+                </select>
+            </div>
+            <div id="camera-section" class="camera-box">
+                <video id="video" class="mirror" autoplay playsinline muted></video>
+                <button onclick="switchCamera()" class="absolute bottom-3 right-3 bg-black/40 backdrop-blur-md text-white w-10 h-10 rounded-full flex items-center justify-center border border-white/10">
+                    <i class="fas fa-camera-rotate text-sm"></i>
+                </button>
+            </div>
+            <div id="ket-section" class="hidden-element">
+                <textarea id="keterangan" class="w-full p-4 h-24 text-xs font-medium" placeholder="Tulis keterangan di sini..."></textarea>
+            </div>
+            <div id="map"></div>
+            <button onclick="kirimAbsensi()" class="w-full btn-primary py-4 rounded-xl text-xs shadow-lg shadow-red-900/20">Kirim Absensi</button>
+        </div>
+    </main>
+    <canvas id="canvas" class="hidden-element"></canvas>
+
+    <script>
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx_YYxl1DM_rpfznIy6Mu7UYlKSZO1edqxDR1K6lVAJqy3oEXDUabe74HQbtsF4g61XHA/exec";
+        let config = {}; let coords = { lat: 0, lng: 0 }; let currentFacingMode = "user";
+
+        async function callBackend(action, data = {}) {
+            const response = await fetch(WEB_APP_URL, { method: "POST", body: JSON.stringify({ action, data }) });
+            const json = await response.json(); return json.result;
+        }
+
+        async function loadConfig() {
+            const res = await callBackend("getAppConfig");
+            config = res;
+            document.getElementById('display-school').innerText = res.school;
+            const classSel = document.getElementById('class-select');
+            classSel.innerHTML = '<option value="">-- PILIH DIVISI --</option>';
+            res.classes.forEach(c => {
+                const o = document.createElement('option'); o.value = o.text = c;
+                classSel.add(o);
+            });
+        }
+
+        function filterSiswa() {
+            const kls = document.getElementById('class-select').value;
+            const stuSel = document.getElementById('student-select');
+            stuSel.innerHTML = '<option value="">-- PILIH NAMA --</option>';
+            config.students.filter(s => s.kelas == kls).forEach(s => {
+                const o = document.createElement('option'); o.value = o.text = s.nama; stuSel.add(o);
+            });
+        }
+
+        async function startCamera(mode) {
+            const video = document.getElementById('video');
+            if (video.srcObject) { video.srcObject.getTracks().forEach(track => track.stop()); }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: mode } });
+                video.srcObject = stream;
+                video.classList.toggle('mirror', mode === "user");
+            } catch (e) { console.error("Kamera ditolak", e); }
+        }
+
+        function switchCamera() { currentFacingMode = (currentFacingMode === "user") ? "environment" : "user"; startCamera(currentFacingMode); }
+
+        function toggleCam() {
+            const s = document.getElementById('status-select').value;
+            const isPresent = (s === 'Hadir' || s === 'Terlambat');
+            document.getElementById('camera-section').classList.toggle('hidden-element', !isPresent);
+            document.getElementById('ket-section').classList.toggle('hidden-element', isPresent);
+        }
+
+        async function kirimAbsensi() {
+            const name = document.getElementById('student-select').value;
+            const kls = document.getElementById('class-select').value;
+            if(!name || !kls) return Swal.fire({icon:'warning', title:'Lengkapi Data!', background:'#1a1a1a', color:'#fff'});
+            document.getElementById('loader').style.display = 'flex';
+            const stat = document.getElementById('status-select').value;
+            let photo = "-";
+            if(stat === 'Hadir' || stat === 'Terlambat') {
+                const canv = document.getElementById('canvas'); const vid = document.getElementById('video');
+                canv.width = vid.videoWidth; canv.height = vid.videoHeight;
+                const ctx = canv.getContext('2d');
+                if (currentFacingMode === "user") { ctx.translate(canv.width, 0); ctx.scale(-1, 1); }
+                ctx.drawImage(vid, 0, 0); photo = canv.toDataURL('image/jpeg', 0.5);
+            }
+            const res = await callBackend("simpanAbsensi", { 
+                divisi: kls, name: name, status: stat, lat: coords.lat, lng: coords.lng, 
+                timestamp: new Date().toLocaleString('id-ID'), keterangan: document.getElementById('keterangan').value, photo: photo 
+            });
+            document.getElementById('loader').style.display = 'none';
+            if(res.success) {
+                Swal.fire({icon:'success', title:'BERHASIL', background:'#1a1a1a', color:'#fff', confirmButtonColor:'#dc2626'})
+                .then(() => { document.getElementById('student-select').value = ""; document.getElementById('keterangan').value = ""; });
+            }
+        }
+
+        window.onload = () => {
+            loadConfig(); startCamera("user");
+            navigator.geolocation.getCurrentPosition(p => {
+                coords.lat = p.coords.latitude; coords.lng = p.coords.longitude;
+                const m = L.map('map',{zoomControl:false, attributionControl:false}).setView([coords.lat, coords.lng], 16);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(m);
+                L.marker([coords.lat, coords.lng]).addTo(m);
+            });
+        };
+    </script>
+</body>
+</html>

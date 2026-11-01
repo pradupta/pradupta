@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Input Artikel Berita | ScoutDupta</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Ubuntu&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://pradupta.github.io/web/img/logo.png">
+  <link rel="shortcut icon" href="https://pradupta.github.io/web/img/logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            crimson: '#DC143C',
+            scout: { brown: '#8B4513', green: '#228B22' }
+          }
+        }
+      }
+    }
+    
+    // 1. KUNCI KEAMANAN & PENGAMBILAN NAMA ASLI
+    // Kita cek namaLengkap dulu, jika tidak ada baru namaUser (email)
+    const userName = localStorage.getItem("namaLengkap") || localStorage.getItem("namaUser") || "Admin";
+    
+    if (localStorage.getItem("isLoggedIn") !== "true") {
+        window.location.replace("loginartikel.html");
+    }
+
+    // 2. LOGIKA TAMPILAN SAAT HALAMAN DIMUAT
+    window.onload = function() {
+        // Tampilkan Nama di Navbar
+        document.getElementById('userDisplay').innerText = userName;
+        // Isi otomatis input penulis (User tidak perlu mengetik nama lagi)
+        document.getElementById('penulis').value = userName;
+
+        // Popup Selamat Datang yang rapi
+        Swal.fire({
+            title: 'Halo, ' + userName + '!',
+            text: 'Selamat datang di Dashboard Artikel ScoutDupta.',
+            icon: 'success',
+            confirmButtonColor: '#DC143C',
+            timer: 3000,
+            timerProgressBar: true
+        });
+    };
+
+    function logout() {
+        Swal.fire({
+            title: 'Keluar?',
+            text: "Anda harus login kembali untuk menulis artikel.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#DC143C',
+            cancelButtonColor: '#aaa',
+            confirmButtonText: 'Ya, Keluar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                localStorage.clear();
+                window.location.replace("loginartikel.html");
+            }
+        })
+    }
+  </script>
+  <style>
+    body { font-family: 'Poppins', sans-serif; scroll-behavior: smooth; }
+    .logo-text { font-family: 'Pacifico', cursive; font-size: 1.8rem; }
+    .sticky-nav { position: sticky; top: 0; z-index: 50; background-color: #111; }
+    .form-input, .form-textarea {
+      width: 100%; padding: 0.75rem; border: 1px solid #D1D5DB; border-radius: 0.375rem; transition: all 0.2s;
+    }
+    .form-input:focus, .form-textarea:focus {
+      border-color: #DC143C; outline: none; box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
+    }
+    .file-preview {
+      width: 100%; min-height: 200px; border: 2px dashed #D1D5DB; border-radius: 0.375rem;
+      display: flex; align-items: center; justify-content: center; overflow: hidden;
+    }
+    .tab-button.active { border-bottom: 2px solid #DC143C; color: #DC143C; }
+    .toolbar-btn { padding: 0.5rem; border-radius: 0.25rem; transition: background 0.2s; color: #4B5563; }
+    .toolbar-btn:hover { background: #F3F4F6; color: #DC143C; }
+  </style>
+</head>
+<body class="bg-gray-50 text-black">
+
+  <nav class="sticky-nav text-white px-4 py-3 flex justify-between items-center shadow-md">
+    <div class="logo-text text-crimson">ScoutDupta</div>
+    <div class="flex items-center gap-6">
+      <ul class="hidden md:flex gap-4 text-sm">
+        <li><a href="index.html" class="hover:text-crimson">Beranda</a></li>
+        <li><a href="berita.html" class="hover:text-crimson">Berita</a></li>
+      </ul>
+      <div class="flex items-center border-l pl-4 border-gray-700">
+        <span class="text-xs mr-3 hidden sm:inline font-medium">Hi, <b id="userDisplay" class="text-crimson uppercase">User</b></span>
+        <button onclick="logout()" class="bg-crimson px-3 py-1 rounded text-xs font-bold hover:bg-white hover:text-crimson transition flex items-center gap-2">
+          <i class="fas fa-sign-out-alt"></i> Keluar
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="py-8 px-4 max-w-5xl mx-auto">
+    <div class="bg-white rounded-xl shadow-lg p-6 md:p-8">
+      
+      <div class="flex items-center mb-8 pb-4 border-b">
+        <div class="w-12 h-12 bg-crimson rounded-full flex items-center justify-center text-white mr-4 shadow-lg">
+          <i class="fas fa-edit text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl font-bold">Buat Artikel Baru</h1>
+          <p class="text-gray-500 text-sm">Tulis berita kepramukaan hari ini</p>
+        </div>
+      </div>
+
+      <div class="flex gap-6 border-b mb-6">
+        <button id="tab-write" class="tab-button active pb-2 font-medium"><i class="fas fa-pen mr-2"></i>Tulis</button>
+        <button id="tab-preview" class="tab-button pb-2 font-medium"><i class="fas fa-eye mr-2"></i>Preview</button>
+      </div>
+
+      <form id="articleForm" class="space-y-6">
+        <div id="write-section">
+          <div class="mb-4">
+            <label class="block text-gray-700 font-semibold mb-2">Judul Artikel</label>
+            <input type="text" id="judul" class="form-input" placeholder="Masukkan judul artikel" required>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 font-semibold mb-2">Nama Penulis</label>
+            <input type="text" id="penulis" class="form-input bg-gray-100 cursor-not-allowed" readonly required>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 font-semibold mb-2">Gambar Utama</label>
+            <div id="gambarPreview" class="file-preview mb-3 bg-gray-50">
+              <div class="text-center text-gray-400">
+                <i class="fas fa-cloud-upload-alt text-3xl mb-2"></i>
+                <p class="text-sm">Klik 'Pilih Gambar' untuk upload</p>
+              </div>
+            </div>
+            <input type="file" id="gambar" accept="image/*" class="hidden">
+            <button type="button" onclick="document.getElementById('gambar').click()" class="bg-gray-200 px-4 py-2 rounded-md hover:bg-gray-300 text-sm font-medium transition">
+              <i class="fas fa-image mr-2"></i>Pilih Gambar
+            </button>
+          </div>
+
+          <div class="mb-4">
+            <label class="block text-gray-700 font-semibold mb-2">Isi Artikel</label>
+            <div class="border rounded-md overflow-hidden">
+              <div class="bg-gray-100 border-b p-2 flex gap-2">
+                <button type="button" onclick="formatText('b')" class="toolbar-btn"><i class="fas fa-bold"></i></button>
+                <button type="button" onclick="formatText('i')" class="toolbar-btn"><i class="fas fa-italic"></i></button>
+                <button type="button" onclick="insertList()" class="toolbar-btn"><i class="fas fa-list-ul"></i></button>
+              </div>
+              <textarea id="isi" class="form-textarea border-none rounded-none h-64 focus:ring-0" placeholder="Tulis berita di sini..." required></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div id="preview-section" class="hidden space-y-4">
+          <div class="border p-6 rounded-lg bg-white shadow-inner min-h-[400px]">
+            <h2 id="prev-judul" class="text-3xl font-bold mb-2"></h2>
+            <div id="prev-meta" class="text-sm text-gray-500 mb-6 pb-2 border-b"></div>
+            <img id="prev-img" class="w-full h-auto rounded-lg mb-6 hidden">
+            <div id="prev-isi" class="prose max-w-none text-gray-800 leading-relaxed whitespace-pre-line"></div>
+          </div>
+        </div>
+
+        <div class="flex gap-4 pt-6 border-t">
+          <button type="submit" id="btnSubmit" class="bg-crimson text-white px-8 py-3 rounded-md font-bold hover:bg-red-700 transition w-full md:w-auto">
+            <i class="fas fa-paper-plane mr-2"></i>Publikasikan Sekarang
+          </button>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <div id="loader" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[100] hidden">
+    <div class="bg-white p-8 rounded-lg text-center max-w-xs w-full">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-crimson mx-auto mb-4"></div>
+      <p class="font-bold text-gray-800">Mempublikasikan...</p>
+      <p class="text-sm text-gray-500 mt-2">Mohon tunggu sebentar</p>
+    </div>
+  </div>
+
+  <script>
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbycJzXx1UFjx-bUjyR2pVOXi2fSvRjHiHbkdCk1yh7EQcnMfldmsUxEpREMSfoggDjtrw/exec';
+    let base64Image = "";
+
+    // Tab Logic
+    const tabWrite = document.getElementById('tab-write');
+    const tabPreview = document.getElementById('tab-preview');
+    const writeSection = document.getElementById('write-section');
+    const previewSection = document.getElementById('preview-section');
+
+    tabWrite.onclick = () => {
+      tabWrite.classList.add('active'); tabPreview.classList.remove('active');
+      writeSection.classList.remove('hidden'); previewSection.classList.add('hidden');
+    };
+
+    tabPreview.onclick = () => {
+      tabPreview.classList.add('active'); tabWrite.classList.remove('active');
+      previewSection.classList.remove('hidden'); writeSection.classList.add('hidden');
+      
+      document.getElementById('prev-judul').innerText = document.getElementById('judul').value || "Judul Belum Diisi";
+      document.getElementById('prev-meta').innerText = `Oleh: ${userName} | ${new Date().toLocaleDateString('id-ID')}`;
+      document.getElementById('prev-isi').innerHTML = document.getElementById('isi').value;
+      
+      const pImg = document.getElementById('prev-img');
+      if(base64Image) { pImg.src = base64Image; pImg.classList.remove('hidden'); } else { pImg.classList.add('hidden'); }
+    };
+
+    // Image Logic dengan Kompresi Otomatis
+    document.getElementById('gambar').onchange = function(e) {
+      const file = e.target.files[0];
+      if(!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          
+          // Set ukuran maksimal lebar 800px (tinggi menyesuaikan)
+          const maxWidth = 800;
+          const scale = maxWidth / img.width;
+          canvas.width = maxWidth;
+          canvas.height = img.height * scale;
+
+          // Gambar ulang foto ke canvas untuk kompresi
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          // Ubah ke Base64 dengan kualitas 0.7 (JPEG lebih ringan)
+          base64Image = canvas.toDataURL('image/jpeg', 0.7);
+          
+          document.getElementById('gambarPreview').innerHTML = 
+            `<img src="${base64Image}" class="max-h-64 object-contain shadow-md rounded">`;
+          
+          console.log("Gambar berhasil dikompres!");
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // Format Text Logic
+    function formatText(tag) {
+      const area = document.getElementById('isi');
+      const start = area.selectionStart;
+      const end = area.selectionEnd;
+      const text = area.value;
+      const selected = text.substring(start, end);
+      if(!selected) return;
+      area.value = text.substring(0, start) + `<${tag}>` + selected + `</${tag}>` + text.substring(end);
+    }
+
+    function insertList() {
+      const area = document.getElementById('isi');
+      const start = area.selectionStart;
+      area.value = area.value.substring(0, start) + "\n• " + area.value.substring(start);
+      area.focus();
+    }
+
+    // FORM SUBMISSION
+    document.getElementById('articleForm').onsubmit = async (e) => {
+      e.preventDefault();
+      document.getElementById('loader').classList.remove('hidden');
+
+      const formData = new URLSearchParams();
+      formData.append('tanggal', new Date().toLocaleDateString('id-ID'));
+      formData.append('judul', document.getElementById('judul').value);
+      formData.append('penulis', userName);
+      formData.append('isi', document.getElementById('isi').value);
+      formData.append('gambar', base64Image);
+
+      try {
+        await fetch(scriptURL, { 
+          method: 'POST', 
+          body: formData,
+          mode: 'no-cors' 
+        });
+        
+        Swal.fire({
+            title: 'Berhasil!',
+            text: 'Artikel Anda telah dipublikasikan.',
+            icon: 'success',
+            confirmButtonColor: '#DC143C'
+        }).then(() => {
+            window.location.href = 'berita.html';
+        });
+      } catch (error) {
+        console.error('Error:', error);
+        Swal.fire('Gagal!', 'Terjadi kesalahan saat mengirim artikel.', 'error');
+      } finally {
+        document.getElementById('loader').classList.add('hidden');
+      }
+    };
+  </script>
+</body>
+</html>

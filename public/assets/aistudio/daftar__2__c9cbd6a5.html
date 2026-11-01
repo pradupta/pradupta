@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="id" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pendaftaran Anggota | ScoutDupta</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="https://pradupta.github.io/web/img/logo.png">
+  <link rel="shortcut icon" href="https://pradupta.github.io/web/img/logo.png">
+  
+  <script>
+    tailwind.config = {
+      theme: { extend: { colors: { crimson: '#DC143C' } } }
+    }
+  </script>
+
+  <style>
+    body { font-family: 'Poppins', sans-serif; background-color: #ffffff; color: #1e293b; scroll-behavior: smooth; }
+    .logo-text { font-family: 'Pacifico', cursive; }
+    .form-card { 
+      background: #ffffff; color: #1a1a1a; border-radius: 1.5rem; 
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid #e2e8f0; border-left: 6px solid #DC143C;
+      margin-bottom: 2rem; padding: 2rem;
+    }
+    .input-field {
+      width: 100%; padding: 0.75rem 1rem; border-radius: 0.75rem;
+      border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; transition: all 0.3s;
+    }
+    .input-field:focus { outline: none; border-color: #DC143C; ring: 3px rgba(220, 20, 60, 0.1); background: #ffffff; }
+    label { font-size: 0.7rem; font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 0.4rem; display: block; }
+    .section-header { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.1rem; margin-bottom: 1.5rem; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; }
+    
+    .val-text { font-size: 0.65rem; transition: color 0.3s; margin-top: 2px; }
+    .invalid { color: #94a3b8; }
+    .valid { color: #10b981; font-weight: bold; }
+    
+    .spinner { border: 3px solid rgba(220, 20, 60, 0.1); border-top: 3px solid #DC143C; border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="py-10 px-4">
+
+  <header class="text-center mb-10">
+    <div class="logo-text text-crimson text-5xl mb-2">ScoutDupta</div>
+    <p class="text-slate-600 tracking-widest uppercase text-xs font-bold">SMAN 20 Kabupaten Tangerang</p>
+  </header>
+
+  <form id="registration-form" class="max-w-4xl mx-auto">
+    
+    <div class="form-card">
+      <div class="section-header"><i class="fas fa-user text-crimson"></i> I. Data Pribadi</div>
+      <div class="grid md:grid-cols-2 gap-5">
+        <div><label>Nama Panggilan</label><input type="text" name="nama_singkat" required class="input-field"></div>
+        <div><label>Nama Lengkap</label><input type="text" name="nama_lengkap" required class="input-field"></div>
+        <div><label>Jenis Kelamin</label>
+          <select name="jenis_kelamin" required class="input-field">
+            <option value="">Pilih</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option>
+          </select>
+        </div>
+        <div><label>Agama</label>
+          <select name="agama" required class="input-field">
+            <option value="">Pilih Agama</option>
+            <option value="Islam">Islam</option>
+            <option value="Kristen Protestan">Kristen Protestan</option>
+            <option value="Katolik">Katolik</option>
+            <option value="Hindu">Hindu</option>
+            <option value="Buddha">Buddha</option>
+            <option value="Konghucu">Konghucu</option>
+          </select>
+        </div>
+        <div><label>Tempat Lahir</label><input type="text" name="tempat_lahir" required class="input-field"></div>
+        <div><label>Tanggal Lahir</label><input type="date" name="tanggal_lahir" required class="input-field"></div>
+      </div>
+    </div>
+
+    <div class="form-card" style="border-left-color: #1a1a1a">
+      <div class="section-header"><i class="fas fa-map-marker-alt text-crimson"></i> II. Domisili</div>
+      <div class="grid md:grid-cols-2 gap-5">
+        <div><label>Provinsi</label><select id="provinsi" name="provinsi" required class="input-field"><option value="">Pilih</option></select></div>
+        <div><label>Kota/Kab</label><select id="kabkota" name="kabkota" required class="input-field"><option value="">Pilih</option></select></div>
+        <div><label>Kecamatan</label><select id="kecamatan" name="kecamatan" required class="input-field"><option value="">Pilih</option></select></div>
+        <div><label>Kelurahan</label><select id="kelurahan" name="kelurahan" required class="input-field"><option value="">Pilih</option></select></div>
+        <div><label>Kode Pos</label><input type="number" name="kode_pos" required class="input-field"></div>
+        <div><label>Alamat Lengkap</label><input type="text" name="alamat_lengkap" required class="input-field"></div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="section-header"><i class="fas fa-id-card text-crimson"></i> III. Sekolah & Kontak</div>
+      <div class="grid md:grid-cols-3 gap-5">
+        <div><label>Kelas</label><select name="kelas" required class="input-field"><option value="">Pilih</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></div>
+        <div><label>Email</label><input type="email" name="email" required class="input-field"></div>
+        <div><label>WhatsApp</label><input type="tel" name="no_wa" required class="input-field"></div>
+      </div>
+    </div>
+
+    <div class="form-card" style="border-left-color: #1a1a1a">
+      <div class="section-header"><i class="fas fa-star text-crimson"></i> IV. Minat & Bakat</div>
+      <div class="grid md:grid-cols-2 gap-5">
+        <div><label>Hobi</label><input type="text" name="hobi" class="input-field"></div>
+        <div><label>Cita-cita</label><input type="text" name="cita_cita" class="input-field"></div>
+        <div><label>Motto</label><input type="text" name="motto" class="input-field"></div>
+        <div><label>Alasan Bergabung</label><input type="text" name="alasan" class="input-field"></div>
+      </div>
+    </div>
+
+    <div class="form-card">
+      <div class="section-header"><i class="fas fa-shield-alt text-crimson"></i> V. Berkas & Sandi</div>
+      <div class="grid md:grid-cols-2 gap-5">
+        <div><label>Pas Foto</label><input type="file" id="pas_foto" accept="image/*" required class="input-field"></div>
+        <div>
+          <label>Password Akun</label>
+          <div class="relative">
+            <input type="password" name="password" id="password" required class="input-field pr-12" placeholder="Ketik Password...">
+            <button type="button" id="toggle-password" class="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-crimson cursor-pointer transition-colors focus:outline-none">
+              <i class="fas fa-eye" id="eye-icon"></i>
+            </button>
+          </div>
+          <div class="mt-2 grid grid-cols-2 gap-1 p-2 bg-slate-100 rounded-lg border border-slate-200">
+            <div id="len" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Min 8 Karakter</div>
+            <div id="upp" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Huruf Besar (A-Z)</div>
+            <div id="low" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Huruf Kecil (a-z)</div>
+            <div id="num" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Angka (0-9)</div>
+            <div id="sym" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Simbol (!@#$)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="text-center pb-20">
+      <button type="submit" id="submit-btn" class="bg-crimson hover:bg-red-700 text-white font-bold px-12 py-4 rounded-2xl shadow-xl transition-all inline-flex items-center gap-3 cursor-pointer">
+        <span>DAFTAR SEKARANG</span> <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+  </form>
+
+  <div id="success-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full text-center text-gray-900 border-t-8 border-crimson">
+      <div class="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-5xl"><i class="fas fa-check"></i></div>
+      <h3 class="text-3xl font-bold mb-2">Pendaftaran Berhasil!</h3>
+      <p class="text-gray-500 mb-8">Terima kasih telah bergabung bersama ScoutDupta.</p>
+      
+      <div id="timer-box" class="bg-gray-50 border border-gray-100 rounded-2xl p-6">
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Menyiapkan Biodata Anda</p>
+        <div class="flex items-center justify-center gap-4">
+          <div class="spinner"></div>
+          <span id="countdown" class="text-4xl font-mono font-bold text-gray-800">01:00</span>
+        </div>
+      </div>
+
+      <div id="download-box" class="hidden">
+        <button id="btn-download" class="w-full bg-crimson text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg cursor-pointer">
+          <i class="fas fa-file-download"></i> DOWNLOAD BIODATA
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxGEn6Bhmc9yAzmITjCCdslxGLWq0rdZQDm3Mko-SWGFxdrffbUuiGiUgLk6crA9HB5/exec';
+    
+    // --- 1. PASSWORD VALIDATOR LOGIC ---
+    const passInput = document.getElementById('password');
+    const requirements = {
+      len: /.{8,}/,
+      upp: /[A-Z]/,
+      low: /[a-z]/,
+      num: /[0-9]/,
+      sym: /[!@#$%^&*(),.?":{}|<>]/
+    };
+
+    passInput.addEventListener('input', () => {
+      const val = passInput.value;
+      Object.keys(requirements).forEach(key => {
+        const element = document.getElementById(key);
+        if (requirements[key].test(val)) {
+          element.classList.replace('invalid', 'valid');
+        } else {
+          element.classList.replace('valid', 'invalid');
+        }
+      });
+    });
+
+    // --- 2. LOGIKA LIHAT/SEMBUNYIKAN PASSWORD ---
+    const togglePasswordBtn = document.getElementById('toggle-password');
+    const eyeIcon = document.getElementById('eye-icon');
+
+    togglePasswordBtn.addEventListener('click', function () {
+      const type = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
+      passInput.setAttribute('type', type);
+      
+      if (type === 'text') {
+        eyeIcon.classList.remove('fa-eye');
+        eyeIcon.classList.add('fa-eye-slash');
+      } else {
+        eyeIcon.classList.remove('fa-eye-slash');
+        eyeIcon.classList.add('fa-eye');
+      }
+    });
+
+    // --- 3. WILAYAH LOGIC ---
+    const REGIONS_API = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+    async function initRegions() {
+      const res = await fetch(`${REGIONS_API}/provinces.json`);
+      const data = await res.json();
+      data.forEach(p => document.getElementById('provinsi').innerHTML += `<option value="${p.id}" data-name="${p.name}">${p.name}</option>`);
+    }
+    document.getElementById('provinsi').onchange = async function() {
+      const res = await fetch(`${REGIONS_API}/regencies/${this.value}.json`);
+      const data = await res.json();
+      const el = document.getElementById('kabkota'); el.innerHTML = '<option value="">Pilih</option>';
+      data.forEach(r => el.innerHTML += `<option value="${r.id}" data-name="${r.name}">${r.name}</option>`);
+    };
+    document.getElementById('kabkota').onchange = async function() {
+      const res = await fetch(`${REGIONS_API}/districts/${this.value}.json`);
+      const data = await res.json();
+      const el = document.getElementById('kecamatan'); el.innerHTML = '<option value="">Pilih</option>';
+      data.forEach(d => el.innerHTML += `<option value="${d.id}" data-name="${d.name}">${d.name}</option>`);
+    };
+    document.getElementById('kecamatan').onchange = async function() {
+      const res = await fetch(`${REGIONS_API}/villages/${this.value}.json`);
+      const data = await res.json();
+      const el = document.getElementById('kelurahan'); el.innerHTML = '<option value="">Pilih</option>';
+      data.forEach(v => el.innerHTML += `<option value="${v.id}" data-name="${v.name}">${v.name}</option>`);
+    };
+
+    // --- 4. SUBMIT & TIMER LOGIC ---
+    function startTimer() {
+      let seconds = 60;
+      const interval = setInterval(() => {
+        seconds--;
+        let m = Math.floor(seconds / 60); let s = seconds % 60;
+        document.getElementById('countdown').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+        if (seconds <= 0) {
+          clearInterval(interval);
+          document.getElementById('timer-box').classList.add('hidden');
+          document.getElementById('download-box').classList.remove('hidden');
+        }
+      }, 1000);
+    }
+
+    document.getElementById('registration-form').onsubmit = async function(e) {
+      e.preventDefault();
+      
+      const pass = passInput.value;
+      const isAllValid = Object.values(requirements).every(reg => reg.test(pass));
+      if(!isAllValid) {
+        alert("Password belum memenuhi syarat keamanan!");
+        return;
+      }
+
+      const btn = document.getElementById('submit-btn');
+      btn.disabled = true; 
+      btn.innerHTML = '<span>MEMPROSES...</span> <i class="fas fa-circle-notch fa-spin"></i>';
+
+      const fileInput = document.getElementById('pas_foto');
+      let fotoBase64 = ""; let fotoName = ""; let fotoMime = "";
+      if(fileInput.files[0]) {
+        fotoName = fileInput.files[0].name;
+        fotoMime = fileInput.files[0].type;
+        fotoBase64 = await new Promise(r => {
+          const reader = new FileReader();
+          // Memotong tanda koma agar menghasilkan string Base64 murni yang siap di-decode oleh Utilities.base64Decode() di kode.gs
+          reader.onload = () => r(reader.result.split(',')[1]);
+          reader.readAsDataURL(fileInput.files[0]);
+        });
+      }
+
+      const getName = (id) => {
+        const el = document.getElementById(id);
+        return el.options[el.selectedIndex]?.getAttribute('data-name') || "";
+      };
+
+      const payload = {
+        nama_singkat: e.target.nama_singkat.value,
+        nama_lengkap: e.target.nama_lengkap.value,
+        jenis_kelamin: e.target.jenis_kelamin.value,
+        agama: e.target.agama.value,
+        tempat_lahir: e.target.tempat_lahir.value,
+        tanggal_lahir: e.target.tanggal_lahir.value,
+        provinsi: getName('provinsi'),
+        kabkota: getName('kabkota'),
+        kecamatan: getName('kecamatan'),
+        kelurahan: getName('kelurahan'),
+        kode_pos: e.target.kode_pos.value,
+        alamat_lengkap: e.target.alamat_lengkap.value,
+        kelas: e.target.kelas.value,
+        email: e.target.email.value,
+        no_wa: e.target.no_wa.value,
+        hobi: e.target.hobi.value || "-",
+        cita_cita: e.target.cita_cita.value || "-",
+        motto: e.target.motto.value || "-",
+        alasan: e.target.alasan.value || "-",
+        // Struktur data penampung berkas foto disesuaikan agar dibaca tepat oleh baris 'row[21]' di kode.gs kamu
+        foto_base64: fotoBase64,
+        foto_nama: fotoName,
+        foto_mime: fotoMime,
+        password: e.target.password.value
+      };
+
+      try {
+        await fetch(APPS_SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+        document.getElementById('success-modal').classList.remove('hidden');
+        startTimer();
+      } catch (err) { 
+        alert("Gagal mengirim data."); 
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<span>DAFTAR SEKARANG</span> <i class="fas fa-paper-plane"></i>';
+      }
+    };
+
+    document.getElementById('btn-download').onclick = () => {
+      window.location.href = "https://pradupta.github.io/web/login.html";
+    };
+
+    initRegions();
+  </script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Anggota | ScoutDupta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@400;500;700&family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/png" href="https://pradupta.github.io/web/img/logo.png">
+    <link rel="shortcut icon" href="https://pradupta.github.io/web/img/logo.png">
+    <style>
+        body { font-family: 'Poppins', sans-serif; background-color: #f3f4f6; }
+        .btn-crimson { background-color: crimson; transition: 0.3s; }
+        .btn-crimson:hover { background-color: #b31030; transform: translateY(-2px); }
+        .logo-font { font-family: 'Ubuntu', sans-serif; font-weight: 700; }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border-t-4 border-red-600">
+        <div class="text-center mb-8">
+            <img src="https://pradupta.github.io/web/img/logo.png" class="w-16 mx-auto mb-4" alt="Logo">
+            <h1 class="text-2xl logo-font">Login <span class="text-red-600">Pradupta</span></h1>
+            <p class="text-gray-500 text-sm">Masuk untuk mengelola artikel</p>
+        </div>
+
+        <form id="loginForm" class="space-y-5">
+            <div>
+                <label class="block text-sm font-semibold mb-1">Email</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <i class="fas fa-envelope"></i>
+                    </span>
+                    <input type="email" name="email" id="emailInput" class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none" placeholder="Masukkan email..." required>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-semibold mb-1">Password</label>
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password" name="password" id="passwordInput" class="w-full pl-10 pr-10 py-2 border rounded-lg focus:ring-2 focus:ring-red-500 outline-none" placeholder="******" required>
+                    <span class="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer text-gray-400 hover:text-red-600" onclick="togglePassword()">
+                        <i class="fas fa-eye" id="eyeIcon"></i>
+                    </span>
+                </div>
+            </div>
+            <button type="submit" class="w-full py-3 text-white font-bold rounded-lg btn-crimson shadow-lg mt-4 uppercase tracking-wider">Masuk</button>
+        </form>
+
+        <p class="text-center text-sm text-gray-500 mt-6">
+            Belum punya akses? <a href="daftar-artikel.html" class="text-red-600 font-bold hover:underline">Daftar Akun</a>
+        </p>
+    </div>
+
+    <script>
+        // Fungsi Lihat Password
+        function togglePassword() {
+            const passField = document.getElementById('passwordInput');
+            const eyeIcon = document.getElementById('eyeIcon');
+            if (passField.type === 'password') {
+                passField.type = 'text';
+                eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                passField.type = 'password';
+                eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbzbpW0ISEpCN8GUiJ03WgkPdxvoM_lOCRWB48tzrC75Sag-XWtlBZgqUHmv-uwlavG-yw/exec';
+        
+        document.getElementById('loginForm').addEventListener('submit', e => {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            btn.innerHTML = '<i class="fas fa-spinner animate-spin"></i> Memverifikasi...';
+            btn.disabled = true;
+
+            // Menggunakan URLSearchParams agar konsisten dengan daftar-artikel.html
+            const formData = new URLSearchParams(new FormData(e.target));
+            formData.append('action', 'login');
+            
+            fetch(scriptURL, { 
+                method: 'POST', 
+                body: formData,
+                mode: 'no-cors' // Menghindari error CORS saat testing lokal
+            })
+            .then(() => {
+                // Ambil nama dari email (teks sebelum @)
+                const emailVal = document.getElementById('emailInput').value;
+                const namaUser = emailVal.split('@')[0];
+
+                // Simpan sesi ke browser
+                localStorage.setItem("isLoggedIn", "true");
+                localStorage.setItem("namaUser", namaUser);
+                
+                // Pindah halaman
+                window.location.href = "artikel1.html";
+            })
+            .catch(error => {
+                console.error('Error!', error.message);
+                alert('Terjadi kesalahan sistem.');
+                btn.innerHTML = 'MASUK';
+                btn.disabled = false;
+            })
+        })
+    </script>
+</body>
+</html>

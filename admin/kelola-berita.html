@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kelola Berita - Admin ScoutDupta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex antialiased">
+
+  <aside id="admin-sidebar" class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 min-h-screen hidden lg:flex"></aside>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <header id="admin-header"></header>
+
+    <main class="p-6 max-w-6xl w-full mx-auto space-y-6">
+
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-xl font-black text-white">Manajemen Berita & Artikel</h2>
+          <p class="text-xs text-slate-400">Kelola seluruh publikasi kabar kegiatan Gerakan Pramuka ScoutDupta.</p>
+        </div>
+        <a href="/admin/tulis-artikel.html" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/25 transition">
+          <i class="fas fa-plus"></i> Tulis Artikel Baru
+        </a>
+      </div>
+
+      <!-- Search Filter -->
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl flex items-center justify-between gap-4">
+        <div class="relative flex-1 max-w-md">
+          <i class="fas fa-search absolute left-3.5 top-3.5 text-slate-500 text-xs"></i>
+          <input type="text" id="filter-article-search" placeholder="Cari judul berita atau penulis..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-xs text-white outline-none focus:border-red-500 transition">
+        </div>
+        <span id="article-count-badge" class="text-xs font-bold text-slate-400">0 Artikel</span>
+      </div>
+
+      <!-- Table Container -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-800/80 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-800">
+              <tr>
+                <th class="p-4">Thumbnail</th>
+                <th class="p-4">Judul Artikel</th>
+                <th class="p-4">Kategori</th>
+                <th class="p-4">Penulis</th>
+                <th class="p-4">Views</th>
+                <th class="p-4">Tanggal</th>
+                <th class="p-4 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="articles-table-body" class="divide-y divide-slate-800 text-slate-300">
+              <tr>
+                <td colspan="7" class="p-8 text-center text-slate-500">Memuat artikel dari database...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { protectAdminRoute } from "/admin/js/admin-auth.js";
+    import { renderAdminLayout } from "/admin/js/admin-app.js";
+    import { db } from "/assets/js/firebase-config.js";
+    import { collection, onSnapshot, query, orderBy, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { formatDateIndo } from "/assets/js/utils.js";
+
+    await protectAdminRoute();
+    renderAdminLayout('berita');
+
+    let allArticles = [];
+    const tableBody = document.getElementById('articles-table-body');
+    const searchInput = document.getElementById('filter-article-search');
+    const countBadge = document.getElementById('article-count-badge');
+
+    const q = query(collection(db, "articles"), orderBy("createdAt", "desc"));
+    onSnapshot(q, (snapshot) => {
+      allArticles = [];
+      snapshot.forEach(doc => {
+        allArticles.push({ id: doc.id, ...doc.data() });
+      });
+      renderTable();
+    });
+
+    function renderTable() {
+      const qText = searchInput.value.toLowerCase().trim();
+      const filtered = allArticles.filter(a => {
+        return !qText || 
+          (a.judul && a.judul.toLowerCase().includes(qText)) ||
+          (a.penulis && a.penulis.toLowerCase().includes(qText));
+      });
+
+      countBadge.innerText = `${filtered.length} Artikel`;
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="7" class="p-8 text-center text-slate-500">
+              <i class="far fa-newspaper text-3xl mb-2 text-slate-600 block"></i>
+              Tidak ada artikel ditemukan.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tableBody.innerHTML = filtered.map(a => {
+        const dateStr = formatDateIndo(a.createdAt);
+        const imgSrc = a.gambar_url || 'https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=200';
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-4">
+              <img src="${imgSrc}" class="w-12 h-12 object-cover rounded-xl bg-slate-800 border border-slate-700" onerror="this.src='https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=200'">
+            </td>
+            <td class="p-4 font-bold text-white max-w-xs">
+              <a href="/artikel-detail.html?id=${a.id}" target="_blank" class="hover:text-red-400 transition line-clamp-2">
+                ${a.judul}
+              </a>
+            </td>
+            <td class="p-4">
+              <span class="px-2.5 py-1 rounded-md text-[9px] font-black uppercase bg-red-600/20 text-red-400 border border-red-600/30">
+                ${a.kategori || 'Kegiatan'}
+              </span>
+            </td>
+            <td class="p-4 text-slate-400">${a.penulis || 'Admin'}</td>
+            <td class="p-4 font-mono font-bold text-slate-300"><i class="far fa-eye mr-1 text-[10px] text-slate-500"></i>${a.views || 0}</td>
+            <td class="p-4 text-slate-400 whitespace-nowrap">${dateStr}</td>
+            <td class="p-4 text-center">
+              <div class="inline-flex items-center gap-1.5">
+                <a href="/artikel-detail.html?id=${a.id}" target="_blank" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition" title="Lihat">
+                  <i class="fas fa-eye text-xs"></i>
+                </a>
+                <a href="/admin/tulis-artikel.html?edit=${a.id}" class="p-2 rounded-lg bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 transition" title="Edit">
+                  <i class="fas fa-edit text-xs"></i>
+                </a>
+                <button onclick="hapusArtikel('${a.id}', '${a.judul.replace(/'/g, "\\'")}')" class="p-2 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 transition" title="Hapus">
+                  <i class="fas fa-trash-alt text-xs"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    searchInput.addEventListener('input', renderTable);
+
+    window.hapusArtikel = async function(id, title) {
+      const result = await Swal.fire({
+        title: 'Hapus Artikel Ini?',
+        text: `"${title}" akan dihapus permanen dari Firestore.`,
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626',
+        cancelButtonColor: '#475569',
+        confirmButtonText: 'Ya, Hapus Sekarang',
+        cancelButtonText: 'Batal'
+      });
+
+      if (result.isConfirmed) {
+        try {
+          await deleteDoc(doc(db, "articles", id));
+          Swal.fire({
+            icon: 'success',
+            title: 'Terhapus',
+            text: 'Artikel telah berhasil dihapus.',
+            confirmButtonColor: '#dc2626',
+            timer: 1500
+          });
+        } catch (err) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Gagal Menghapus',
+            text: err.message,
+            confirmButtonColor: '#dc2626'
+          });
+        }
+      }
+    };
+  </script>
+</body>
+</html>

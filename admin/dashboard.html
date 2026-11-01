@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dasbor Admin - ScoutDupta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex antialiased">
+
+  <!-- Desktop Sidebar -->
+  <aside id="admin-sidebar" class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 min-h-screen hidden lg:flex">
+    <!-- Rendered by admin-app.js -->
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <div class="flex-1 flex flex-col min-w-0">
+    <header id="admin-header">
+      <!-- Rendered by admin-app.js -->
+    </header>
+
+    <main class="p-6 max-w-6xl w-full mx-auto space-y-6">
+
+      <!-- Welcome Banner -->
+      <div class="bg-gradient-to-r from-red-950 via-slate-900 to-slate-900 p-6 rounded-3xl border border-red-900/30 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-red-600/20 text-red-400 uppercase tracking-widest border border-red-600/30">
+            Control Center
+          </span>
+          <h2 class="text-xl font-black text-white mt-1">Selamat Datang di Dasbor ScoutDupta</h2>
+          <p class="text-xs text-slate-400 mt-0.5">Sistem Manajemen Pramuka Pangkalan SMAN 20 Kabupaten Tangerang berbasis Firebase Realtime.</p>
+        </div>
+        <div class="flex gap-2.5">
+          <a href="/admin/tulis-artikel.html" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-black uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-600/20 transition">
+            <i class="fas fa-plus"></i> Buat Artikel
+          </a>
+          <a href="/admin/kelola-absen.html" class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition">
+            <i class="fas fa-eye mr-1"></i> Pantau Presensi
+          </a>
+        </div>
+      </div>
+
+      <!-- Realtime Metric Stat Cards -->
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pendaftar Anggota</span>
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-sm">
+              <i class="fas fa-user-plus"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="stat-registrations" class="text-3xl font-black text-white">0</span>
+            <span class="text-[10px] text-emerald-400 font-bold">Terdaftar</span>
+          </div>
+          <a href="/admin/kelola-anggota.html" class="text-[10px] text-slate-400 hover:text-white font-bold mt-2 inline-flex items-center gap-1">
+            Lihat data <i class="fas fa-arrow-right text-[8px]"></i>
+          </a>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Total Presensi</span>
+            <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-400 flex items-center justify-center text-sm">
+              <i class="fas fa-fingerprint"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="stat-attendance" class="text-3xl font-black text-white">0</span>
+            <span class="text-[10px] text-purple-400 font-bold">Catatan</span>
+          </div>
+          <a href="/admin/kelola-absen.html" class="text-[10px] text-slate-400 hover:text-white font-bold mt-2 inline-flex items-center gap-1">
+            Lihat rekap <i class="fas fa-arrow-right text-[8px]"></i>
+          </a>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Artikel Berita</span>
+            <div class="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center text-sm">
+              <i class="fas fa-newspaper"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="stat-articles" class="text-3xl font-black text-white">0</span>
+            <span class="text-[10px] text-blue-400 font-bold">Terbit</span>
+          </div>
+          <a href="/admin/kelola-berita.html" class="text-[10px] text-slate-400 hover:text-white font-bold mt-2 inline-flex items-center gap-1">
+            Kelola berita <i class="fas fa-arrow-right text-[8px]"></i>
+          </a>
+        </div>
+
+        <div class="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between">
+          <div class="flex justify-between items-center mb-3">
+            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Album Proker</span>
+            <div class="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-400 flex items-center justify-center text-sm">
+              <i class="fas fa-images"></i>
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2">
+            <span id="stat-proker" class="text-3xl font-black text-white">0</span>
+            <span class="text-[10px] text-amber-400 font-bold">Album</span>
+          </div>
+          <a href="/admin/kelola-proker.html" class="text-[10px] text-slate-400 hover:text-white font-bold mt-2 inline-flex items-center gap-1">
+            Buka album <i class="fas fa-arrow-right text-[8px]"></i>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- Realtime Recent Activity Feed -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Recent Attendance Stream -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+              Presensi Terbaru Masuk
+            </h3>
+            <a href="/admin/kelola-absen.html" class="text-xs text-red-400 hover:text-red-300 font-bold">Semua &rarr;</a>
+          </div>
+
+          <div id="recent-attendance-list" class="space-y-2.5">
+            <div class="p-4 text-center text-xs text-slate-500">Memuat data presensi realtime...</div>
+          </div>
+        </div>
+
+        <!-- Recent Member Registrations Stream -->
+        <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5 space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-extrabold text-white flex items-center gap-2">
+              <i class="fas fa-user-check text-red-500"></i>
+              Pendaftar Anggota Baru
+            </h3>
+            <a href="/admin/kelola-anggota.html" class="text-xs text-red-400 hover:text-red-300 font-bold">Semua &rarr;</a>
+          </div>
+
+          <div id="recent-registrations-list" class="space-y-2.5">
+            <div class="p-4 text-center text-xs text-slate-500">Memuat data pendaftaran realtime...</div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { protectAdminRoute } from "/admin/js/admin-auth.js";
+    import { renderAdminLayout } from "/admin/js/admin-app.js";
+    import { db } from "/assets/js/firebase-config.js";
+    import { collection, onSnapshot, query, orderBy, limit } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { formatDateIndo } from "/assets/js/utils.js";
+
+    // 1. Guard route
+    await protectAdminRoute();
+    renderAdminLayout('dashboard');
+
+    // 2. Realtime stats listeners
+    onSnapshot(collection(db, "registrations"), snap => {
+      document.getElementById('stat-registrations').innerText = snap.size;
+    });
+
+    onSnapshot(collection(db, "attendance"), snap => {
+      document.getElementById('stat-attendance').innerText = snap.size;
+    });
+
+    onSnapshot(collection(db, "articles"), snap => {
+      document.getElementById('stat-articles').innerText = snap.size;
+    });
+
+    onSnapshot(collection(db, "proker"), snap => {
+      document.getElementById('stat-proker').innerText = snap.size;
+    });
+
+    // 3. Realtime stream for recent attendance
+    const attQuery = query(collection(db, "attendance"), orderBy("createdAt", "desc"), limit(5));
+    onSnapshot(attQuery, snap => {
+      const el = document.getElementById('recent-attendance-list');
+      if (snap.empty) {
+        el.innerHTML = '<div class="p-6 text-center text-xs text-slate-500">Belum ada presensi tercatat.</div>';
+        return;
+      }
+      el.innerHTML = snap.docs.map(doc => {
+        const d = doc.data();
+        const statColor = d.status === 'Hadir' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 
+                         d.status === 'Terlambat' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 
+                         'bg-rose-500/10 text-rose-400 border-rose-500/20';
+        return `
+          <div class="p-3 bg-slate-950/60 rounded-2xl border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
+                ${d.user_name ? d.user_name.charAt(0) : 'A'}
+              </div>
+              <div>
+                <p class="text-xs font-bold text-white">${d.user_name || '-'}</p>
+                <p class="text-[10px] text-slate-400">${d.divisi || '-'}</p>
+              </div>
+            </div>
+            <div class="text-right">
+              <span class="px-2 py-0.5 rounded-full text-[9px] font-black border ${statColor}">${d.status}</span>
+              <p class="text-[9px] text-slate-500 mt-1">${d.timestamp ? d.timestamp.split(',')[1] || d.timestamp : '-'}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    });
+
+    // 4. Realtime stream for recent registrations
+    const regQuery = query(collection(db, "registrations"), orderBy("createdAt", "desc"), limit(5));
+    onSnapshot(regQuery, snap => {
+      const el = document.getElementById('recent-registrations-list');
+      if (snap.empty) {
+        el.innerHTML = '<div class="p-6 text-center text-xs text-slate-500">Belum ada data pendaftar baru.</div>';
+        return;
+      }
+      el.innerHTML = snap.docs.map(doc => {
+        const d = doc.data();
+        return `
+          <div class="p-3 bg-slate-950/60 rounded-2xl border border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-xl bg-red-600/20 text-red-500 flex items-center justify-center font-bold text-xs">
+                <i class="fas fa-user"></i>
+              </div>
+              <div>
+                <p class="text-xs font-bold text-white">${d.nama_lengkap || d.nama_singkat || '-'}</p>
+                <p class="text-[10px] text-slate-400">Kelas ${d.kelas || '-'} • ${d.kabkota || d.provinsi || '-'}</p>
+              </div>
+            </div>
+            <a href="/admin/kelola-anggota.html?id=${doc.id}" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-[10px] font-bold rounded-lg transition">
+              Biodata
+            </a>
+          </div>
+        `;
+      }).join('');
+    });
+  </script>
+</body>
+</html>

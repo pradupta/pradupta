@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Presensi Digital - ScoutDupta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body class="bg-slate-900 min-h-screen text-white antialiased pb-24">
+
+  <!-- Fullscreen Loading Spinner -->
+  <div id="loader" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex flex-col items-center justify-center">
+    <div class="w-12 h-12 border-4 border-red-500/20 border-t-red-600 rounded-full animate-spin mb-4"></div>
+    <p class="text-xs font-black uppercase tracking-widest text-red-500">Menyimpan Presensi...</p>
+    <p class="text-[10px] text-slate-400 mt-1">Mengirim data & koordinat GPS ke database</p>
+  </div>
+
+  <!-- Header -->
+  <header class="p-6 pb-2 max-w-md mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <a href="/index.html" class="w-10 h-10 rounded-2xl bg-white/10 hover:bg-white/20 border border-white/20 flex items-center justify-center text-white active:scale-95 transition">
+        <i class="fas fa-arrow-left"></i>
+      </a>
+      <div>
+        <h1 class="text-xl font-black italic tracking-tight text-white uppercase">PRADUPTA</h1>
+        <p class="text-[9px] text-red-500 font-extrabold uppercase tracking-[0.25em]">Smart Attendance</p>
+      </div>
+    </div>
+    <span class="px-2.5 py-1 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+      <i class="fas fa-satellite-dish mr-1 text-[8px]"></i> GPS Ready
+    </span>
+  </header>
+
+  <main class="max-w-md mx-auto p-4 space-y-4">
+
+    <!-- Card Form -->
+    <div class="bg-slate-800/80 backdrop-blur-xl border border-slate-700/80 rounded-3xl p-5 space-y-4 shadow-xl">
+      
+      <!-- Divisi Select -->
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider ml-1">Pilih Divisi / Sangga</label>
+        <select id="class-select" class="w-full p-3.5 text-xs font-bold rounded-2xl bg-slate-900/90 border border-slate-700 text-white outline-none focus:border-red-500 transition">
+          <option value="">-- MEMUAT DIVISI --</option>
+        </select>
+      </div>
+
+      <!-- Nama Anggota Select -->
+      <div class="space-y-1.5">
+        <div class="flex justify-between items-center px-1">
+          <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Nama Anggota</label>
+          <button type="button" onclick="toggleCustomName()" id="btn-toggle-custom" class="text-[10px] text-red-400 hover:text-red-300 font-bold">Ketik manual?</button>
+        </div>
+        
+        <select id="student-select" class="w-full p-3.5 text-xs font-bold rounded-2xl bg-slate-900/90 border border-slate-700 text-white outline-none focus:border-red-500 transition">
+          <option value="">-- PILIH DIVISI TERLEBIH DAHULU --</option>
+        </select>
+        
+        <input type="text" id="custom-name-input" placeholder="Tulis nama lengkap Anda..." class="hidden w-full p-3.5 text-xs font-bold rounded-2xl bg-slate-900/90 border border-slate-700 text-white outline-none focus:border-red-500 transition mt-2">
+      </div>
+
+      <!-- Status Kehadiran -->
+      <div class="space-y-1.5">
+        <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider ml-1">Status Kehadiran</label>
+        <select id="status-select" class="w-full p-3.5 text-xs font-black rounded-2xl bg-slate-900/90 border border-slate-700 text-red-500 outline-none focus:border-red-500 transition">
+          <option value="Hadir">HADIR (Wajib Foto Selfie)</option>
+          <option value="Sakit">SAKIT</option>
+          <option value="Izin">IZIN</option>
+          <option value="Alpa">ALPA</option>
+          <option value="Terlambat">TERLAMBAT (Wajib Foto Selfie)</option>
+        </select>
+      </div>
+
+      <!-- Camera Selfie Box -->
+      <div id="camera-section" class="camera-box border border-slate-700">
+        <video id="video-absen" class="mirror" autoplay playsinline muted></video>
+        <div class="absolute top-3 left-3 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full text-[9px] font-bold text-white flex items-center gap-1.5 border border-white/10">
+          <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span> Live Preview
+        </div>
+        <button type="button" onclick="switchCamera()" class="absolute bottom-3 right-3 bg-black/60 hover:bg-black/80 backdrop-blur-md text-white w-10 h-10 rounded-full flex items-center justify-center border border-white/20 active:scale-90 transition">
+          <i class="fas fa-camera-rotate text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Keterangan Box (shown when Sakit/Izin/Alpa) -->
+      <div id="ket-section" class="hidden space-y-1.5">
+        <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider ml-1">Alasan / Keterangan</label>
+        <textarea id="keterangan" rows="3" class="w-full p-3.5 text-xs rounded-2xl bg-slate-900/90 border border-slate-700 text-white outline-none focus:border-red-500 transition" placeholder="Tuliskan alasan ketidakhadiran secara jelas..."></textarea>
+      </div>
+
+      <!-- Leaflet Map Box -->
+      <div class="space-y-1.5">
+        <div class="flex justify-between items-center px-1">
+          <label class="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">Lokasi Kehadiran (GPS)</label>
+          <span id="coords-text" class="text-[9px] text-slate-400 font-mono">Mendeteksi...</span>
+        </div>
+        <div id="map-absen" class="h-36 rounded-2xl overflow-hidden border border-slate-700/80"></div>
+      </div>
+
+      <!-- Submit Button -->
+      <button type="button" onclick="kirimAbsensi()" class="w-full py-4 bg-red-600 hover:bg-red-700 text-white font-extrabold rounded-2xl text-xs uppercase tracking-widest shadow-lg shadow-red-600/30 active:scale-95 transition-all">
+        <i class="fas fa-paper-plane mr-2"></i> Kirim Presensi Sekarang
+      </button>
+
+    </div>
+
+  </main>
+
+  <canvas id="canvas-absen" class="hidden"></canvas>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800 py-2.5 z-40 shadow-lg">
+    <div class="max-w-md mx-auto flex justify-around">
+      <a href="/index.html" class="flex flex-col items-center text-slate-400 hover:text-red-500 transition">
+        <i class="fas fa-home text-lg"></i>
+        <span class="text-[10px] font-extrabold mt-0.5">Beranda</span>
+      </a>
+      <a href="/berita.html" class="flex flex-col items-center text-slate-400 hover:text-red-500 transition">
+        <i class="fas fa-newspaper text-lg"></i>
+        <span class="text-[10px] font-extrabold mt-0.5">Berita</span>
+      </a>
+      <a href="/absen.html" class="flex flex-col items-center text-red-500">
+        <i class="fas fa-camera text-lg"></i>
+        <span class="text-[10px] font-extrabold mt-0.5">Absen</span>
+      </a>
+      <a href="/proker.html" class="flex flex-col items-center text-slate-400 hover:text-red-500 transition">
+        <i class="fas fa-images text-lg"></i>
+        <span class="text-[10px] font-extrabold mt-0.5">Proker</span>
+      </a>
+      <a href="/daftar.html" class="flex flex-col items-center text-slate-400 hover:text-red-500 transition">
+        <i class="fas fa-user-plus text-lg"></i>
+        <span class="text-[10px] font-extrabold mt-0.5">Daftar</span>
+      </a>
+    </div>
+  </nav>
+
+  <script type="module">
+    import { db } from "/assets/js/firebase-config.js";
+    import { doc, getDoc, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    let rosterConfig = {
+      classes: [
+        "Sangga Penegas (Kelas X)",
+        "Sangga Pendobrak (Kelas X)",
+        "Sangga Perintis (Kelas XI)",
+        "Sangga Pelaksana (Kelas XI)",
+        "Dewan Ambalan (Kelas XII)",
+        "Pembina & Pelatih"
+      ],
+      students: [
+        { nama: "Ahmad Rizki Pratama", kelas: "Sangga Penegas (Kelas X)" },
+        { nama: "Bunga Citra Lestari", kelas: "Sangga Penegas (Kelas X)" },
+        { nama: "Dimas Anggara", kelas: "Sangga Pendobrak (Kelas X)" },
+        { nama: "Fajar Maulana", kelas: "Sangga Perintis (Kelas XI)" },
+        { nama: "Gita Safitri", kelas: "Sangga Perintis (Kelas XI)" },
+        { nama: "Hafidz Sajili", kelas: "Pembina & Pelatih" },
+        { nama: "Muhammad Farhan", kelas: "Dewan Ambalan (Kelas XII)" },
+        { nama: "Nabila Putri Rahayu", kelas: "Dewan Ambalan (Kelas XII)" }
+      ]
+    };
+
+    let coords = { lat: -6.1783, lng: 106.6319 }; // Default Tangerang
+    let map = null;
+    let marker = null;
+    let currentFacingMode = "user";
+    let isCustomName = false;
+
+    // Load roster from Firestore
+    async function initRoster() {
+      try {
+        const snap = await getDoc(doc(db, "config", "attendance_roster"));
+        if (snap.exists()) {
+          rosterConfig = snap.data();
+        }
+      } catch (e) {
+        console.warn("Using fallback roster config:", e);
+      }
+
+      const classSel = document.getElementById('class-select');
+      classSel.innerHTML = '<option value="">-- PILIH DIVISI / SANGGA --</option>';
+      rosterConfig.classes.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = opt.text = c;
+        classSel.add(opt);
+      });
+    }
+
+    window.filterSiswa = function() {
+      const kls = document.getElementById('class-select').value;
+      const stuSel = document.getElementById('student-select');
+      stuSel.innerHTML = '<option value="">-- PILIH NAMA SISWA/ANGGOTA --</option>';
+      
+      const filtered = (rosterConfig.students || []).filter(s => s.kelas === kls);
+      if (filtered.length === 0) {
+        stuSel.innerHTML = '<option value="">(Belum ada data roster di divisi ini)</option>';
+      } else {
+        filtered.forEach(s => {
+          const opt = document.createElement('option');
+          opt.value = opt.text = s.nama;
+          stuSel.add(opt);
+        });
+      }
+    };
+    document.getElementById('class-select').onchange = window.filterSiswa;
+
+    window.toggleCustomName = function() {
+      isCustomName = !isCustomName;
+      const stuSel = document.getElementById('student-select');
+      const customInp = document.getElementById('custom-name-input');
+      const toggleBtn = document.getElementById('btn-toggle-custom');
+
+      if (isCustomName) {
+        stuSel.classList.add('hidden');
+        customInp.classList.remove('hidden');
+        customInp.focus();
+        toggleBtn.innerText = "Pilih dari daftar";
+      } else {
+        stuSel.classList.remove('hidden');
+        customInp.classList.add('hidden');
+        toggleBtn.innerText = "Ketik manual?";
+      }
+    };
+
+    // Camera Handler
+    async function startCamera(mode) {
+      const video = document.getElementById('video-absen');
+      if (video.srcObject) {
+        video.srcObject.getTracks().forEach(t => t.stop());
+      }
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: mode, width: { ideal: 640 }, height: { ideal: 480 } }
+        });
+        video.srcObject = stream;
+        video.classList.toggle('mirror', mode === "user");
+      } catch (err) {
+        console.warn("Kamera tidak dapat diakses:", err);
+      }
+    }
+
+    window.switchCamera = function() {
+      currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+      startCamera(currentFacingMode);
+    };
+
+    function toggleCamSection() {
+      const stat = document.getElementById('status-select').value;
+      const needPhoto = (stat === 'Hadir' || stat === 'Terlambat');
+      const camSec = document.getElementById('camera-section');
+      const ketSec = document.getElementById('ket-section');
+
+      if (needPhoto) {
+        camSec.classList.remove('hidden');
+        ketSec.classList.add('hidden');
+        startCamera(currentFacingMode);
+      } else {
+        camSec.classList.add('hidden');
+        ketSec.classList.remove('hidden');
+        const video = document.getElementById('video-absen');
+        if (video.srcObject) video.srcObject.getTracks().forEach(t => t.stop());
+      }
+    }
+    document.getElementById('status-select').onchange = toggleCamSection;
+
+    // GPS Geolocation and Leaflet Map
+    function initMap() {
+      map = L.map('map-absen', { zoomControl: false, attributionControl: false }).setView([coords.lat, coords.lng], 15);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+      marker = L.marker([coords.lat, coords.lng]).addTo(map);
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (pos) => {
+            coords.lat = pos.coords.latitude;
+            coords.lng = pos.coords.longitude;
+            map.setView([coords.lat, coords.lng], 16);
+            marker.setLatLng([coords.lat, coords.lng]);
+            document.getElementById('coords-text').innerText = `${coords.lat.toFixed(5)}, ${coords.lng.toFixed(5)}`;
+          },
+          (err) => {
+            console.warn("GPS warning:", err.message);
+            document.getElementById('coords-text').innerText = "Lokasi default";
+          },
+          { enableHighAccuracy: true, timeout: 10000 }
+        );
+      }
+    }
+
+    // Submit Attendance to Firestore
+    window.kirimAbsensi = async function() {
+      const kls = document.getElementById('class-select').value;
+      const name = isCustomName 
+        ? document.getElementById('custom-name-input').value.trim() 
+        : document.getElementById('student-select').value;
+      const status = document.getElementById('status-select').value;
+      const ket = document.getElementById('keterangan').value.trim();
+
+      if (!kls) {
+        return Swal.fire({ icon: 'warning', title: 'Pilih Divisi!', text: 'Silakan pilih divisi atau sangga Anda.', confirmButtonColor: '#dc2626' });
+      }
+      if (!name) {
+        return Swal.fire({ icon: 'warning', title: 'Lengkapi Nama!', text: 'Silakan pilih atau ketik nama Anda.', confirmButtonColor: '#dc2626' });
+      }
+
+      document.getElementById('loader').classList.remove('hidden');
+
+      let photoBase64 = "-";
+      if (status === 'Hadir' || status === 'Terlambat') {
+        const video = document.getElementById('video-absen');
+        const canvas = document.getElementById('canvas-absen');
+        if (video.videoWidth > 0) {
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          if (currentFacingMode === "user") {
+            ctx.translate(canvas.width, 0);
+            ctx.scale(-1, 1);
+          }
+          ctx.drawImage(video, 0, 0);
+          photoBase64 = canvas.toDataURL('image/jpeg', 0.6);
+        }
+      }
+
+      const now = new Date();
+      const timestampString = now.toLocaleString('id-ID', {
+        dateStyle: 'full',
+        timeStyle: 'medium',
+        timeZone: 'Asia/Jakarta'
+      });
+
+      try {
+        await addDoc(collection(db, "attendance"), {
+          divisi: kls,
+          user_name: name,
+          status: status,
+          lat: coords.lat,
+          lng: coords.lng,
+          foto_wajah_url: photoBase64,
+          keterangan: ket || "-",
+          timestamp: timestampString,
+          createdAt: now.toISOString()
+        });
+
+        document.getElementById('loader').classList.add('hidden');
+
+        Swal.fire({
+          icon: 'success',
+          title: 'PRESENSI BERHASIL!',
+          html: `<p class="text-xs">Terima kasih <b>${name}</b>, kehadiran Anda telah tersimpan di sistem ScoutDupta.</p>`,
+          confirmButtonColor: '#dc2626'
+        }).then(() => {
+          document.getElementById('student-select').value = "";
+          document.getElementById('custom-name-input').value = "";
+          document.getElementById('keterangan').value = "";
+        });
+
+      } catch (error) {
+        document.getElementById('loader').classList.add('hidden');
+        console.error("Attendance submission error:", error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Mengirim Presensi',
+          text: error.message,
+          confirmButtonColor: '#dc2626'
+        });
+      }
+    };
+
+    // Initialize on load
+    window.onload = () => {
+      initRoster();
+      startCamera(currentFacingMode);
+      initMap();
+    };
+  </script>
+</body>
+</html>

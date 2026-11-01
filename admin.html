@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Portal Administrator - ScoutDupta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4 antialiased">
+
+  <!-- Loading State Overlay -->
+  <div id="auth-loading" class="text-center space-y-4">
+    <div class="w-12 h-12 border-4 border-red-500/20 border-t-red-600 rounded-full animate-spin mx-auto"></div>
+    <p class="text-xs uppercase font-extrabold tracking-widest text-slate-400">Memeriksa Izin Sesi Administrator...</p>
+  </div>
+
+  <!-- Admin Login Card (Shown if unauthenticated) -->
+  <div id="admin-login-box" class="hidden bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md border-t-8 border-red-600 relative">
+    
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-600 flex items-center justify-center text-white text-2xl mx-auto mb-3 shadow-lg shadow-red-600/30">
+        <i class="fas fa-shield-alt"></i>
+      </div>
+      <h1 class="text-xl font-black tracking-tight">Portal Khusus <span class="text-red-500">Administrator</span></h1>
+      <p class="text-xs text-slate-400 mt-1">Gerakan Pramuka SMAN 20 Kabupaten Tangerang</p>
+      <span class="inline-block mt-2 px-3 py-0.5 rounded-full text-[9px] font-extrabold bg-red-950 text-red-400 border border-red-800 uppercase tracking-widest">
+        Akses Terbatas & Terisolasi
+      </span>
+    </div>
+
+    <form id="formAdminAuth" class="space-y-4">
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5 ml-1">Email Administrator</label>
+        <div class="relative">
+          <i class="fas fa-envelope absolute left-4 top-3.5 text-slate-500 text-xs"></i>
+          <input type="email" id="inputAdminEmail" class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 rounded-xl pl-10 pr-4 py-3 text-xs text-white outline-none transition" placeholder="admin@scoutdupta.id" required>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5 ml-1">Kata Sandi</label>
+        <div class="relative">
+          <i class="fas fa-lock absolute left-4 top-3.5 text-slate-500 text-xs"></i>
+          <input type="password" id="inputAdminPassword" class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 rounded-xl pl-10 pr-10 py-3 text-xs text-white outline-none transition" placeholder="••••••••" required>
+          <button type="button" onclick="togglePass()" class="absolute right-3.5 top-3 text-slate-500 hover:text-white">
+            <i class="fas fa-eye text-xs" id="eye-icon"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" id="btn-submit-auth" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-lg shadow-red-600/30 active:scale-95 transition mt-2">
+        <i class="fas fa-key mr-1.5"></i> Masuk Panel Admin
+      </button>
+    </form>
+
+    <div class="relative my-6 text-center">
+      <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
+      <span class="relative px-3 bg-slate-900 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Atau masuk dengan</span>
+    </div>
+
+    <button type="button" id="btn-google-auth" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-200 flex items-center justify-center gap-2 shadow-sm active:scale-95 transition">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4" alt="Google">
+      <span>Masuk Akun Google Admin</span>
+    </button>
+
+    <div class="mt-8 text-center">
+      <a href="/index.html" class="text-xs text-slate-500 hover:text-slate-300 transition">
+        <i class="fas fa-arrow-left mr-1"></i> Kembali ke Beranda Utama
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Admin Hub Card (Shown if authenticated) -->
+  <div id="admin-hub-box" class="hidden bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-lg border-t-8 border-red-600 space-y-6">
+    <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-red-600/20 text-red-500 flex items-center justify-center text-xl font-black">
+          <i class="fas fa-user-shield"></i>
+        </div>
+        <div>
+          <h2 class="text-base font-black text-white">Selamat Datang, Administrator</h2>
+          <p id="hub-user-email" class="text-xs text-red-400 font-mono">admin@scoutdupta.id</p>
+        </div>
+      </div>
+      <button onclick="handleLogout()" class="px-3 py-1.5 bg-slate-800 hover:bg-red-600/20 text-slate-300 hover:text-red-400 text-xs font-bold rounded-xl transition">
+        <i class="fas fa-sign-out-alt"></i> Keluar
+      </button>
+    </div>
+
+    <div>
+      <p class="text-[10px] font-extrabold uppercase tracking-widest text-slate-400 mb-3">Pilih Menu Manajemen Sistem:</p>
+      <div class="grid grid-cols-2 gap-3 text-xs">
+        <a href="/admin/dashboard.html" class="p-4 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 rounded-2xl flex flex-col gap-2 group transition">
+          <div class="w-9 h-9 rounded-xl bg-red-600/20 text-red-500 flex items-center justify-center font-bold text-sm group-hover:scale-105 transition-transform">
+            <i class="fas fa-chart-pie"></i>
+          </div>
+          <span class="font-black text-white">Dasbor Utama</span>
+          <span class="text-[10px] text-slate-400">Ringkasan & statistik live</span>
+        </a>
+
+        <a href="/admin/kelola-absen.html" class="p-4 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 rounded-2xl flex flex-col gap-2 group transition">
+          <div class="w-9 h-9 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center font-bold text-sm group-hover:scale-105 transition-transform">
+            <i class="fas fa-fingerprint"></i>
+          </div>
+          <span class="font-black text-white">Presensi Realtime</span>
+          <span class="text-[10px] text-slate-400">Monitoring kehadiran GPS</span>
+        </a>
+
+        <a href="/admin/kelola-anggota.html" class="p-4 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 rounded-2xl flex flex-col gap-2 group transition">
+          <div class="w-9 h-9 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center font-bold text-sm group-hover:scale-105 transition-transform">
+            <i class="fas fa-users"></i>
+          </div>
+          <span class="font-black text-white">Data Anggota Baru</span>
+          <span class="text-[10px] text-slate-400">Verifikasi & cetak biodata</span>
+        </a>
+
+        <a href="/admin/kelola-berita.html" class="p-4 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 rounded-2xl flex flex-col gap-2 group transition">
+          <div class="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center font-bold text-sm group-hover:scale-105 transition-transform">
+            <i class="fas fa-newspaper"></i>
+          </div>
+          <span class="font-black text-white">Kelola Berita</span>
+          <span class="text-[10px] text-slate-400">Publikasi warta & artikel</span>
+        </a>
+
+        <a href="/admin/tulis-artikel.html" class="p-4 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 rounded-2xl flex flex-col gap-2 group transition">
+          <div class="w-9 h-9 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center font-bold text-sm group-hover:scale-105 transition-transform">
+            <i class="fas fa-pen-nib"></i>
+          </div>
+          <span class="font-black text-white">Tulis Artikel Baru</span>
+          <span class="text-[10px] text-slate-400">Editor WYSIWYG & gambar</span>
+        </a>
+
+        <a href="/admin/kelola-proker.html" class="p-4 bg-slate-950 hover:bg-slate-800/80 border border-slate-800 rounded-2xl flex flex-col gap-2 group transition">
+          <div class="w-9 h-9 rounded-xl bg-rose-600/20 text-rose-400 flex items-center justify-center font-bold text-sm group-hover:scale-105 transition-transform">
+            <i class="fas fa-images"></i>
+          </div>
+          <span class="font-black text-white">Album Proker</span>
+          <span class="text-[10px] text-slate-400">Galeri program kerja</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="pt-4 border-t border-slate-800 flex justify-between items-center text-xs">
+      <a href="/index.html" class="text-slate-400 hover:text-white transition">
+        <i class="fas fa-external-link-alt mr-1"></i> Buka Beranda Publik
+      </a>
+      <a href="/admin/dashboard.html" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl shadow-lg transition">
+        Buka Dasbor Penuh &rarr;
+      </a>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db } from "/assets/js/firebase-config.js";
+    import { loginWithEmail, loginWithGoogle, logoutUser } from "/assets/js/auth.js";
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+    import { doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+    const loadingEl = document.getElementById('auth-loading');
+    const loginBox = document.getElementById('admin-login-box');
+    const hubBox = document.getElementById('admin-hub-box');
+    const userEmailEl = document.getElementById('hub-user-email');
+
+    window.togglePass = () => {
+      const passInp = document.getElementById('inputAdminPassword');
+      const eye = document.getElementById('eye-icon');
+      if (passInp.type === 'password') {
+        passInp.type = 'text';
+        eye.className = 'fas fa-eye-slash text-xs';
+      } else {
+        passInp.type = 'password';
+        eye.className = 'fas fa-eye text-xs';
+      }
+    };
+
+    onAuthStateChanged(auth, async (user) => {
+      loadingEl.classList.add('hidden');
+
+      if (!user) {
+        hubBox.classList.add('hidden');
+        loginBox.classList.remove('hidden');
+        return;
+      }
+
+      let role = 'member';
+      if (user.email === 'hafidzsajili464@gmail.com') {
+        role = 'admin';
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          role = userDoc.data().role || role;
+        }
+      } catch (e) {
+        console.warn("Role check:", e);
+      }
+
+      if (role !== 'admin' && role !== 'author' && user.email !== 'hafidzsajili464@gmail.com') {
+        Swal.fire({
+          icon: 'error',
+          title: 'Akses Ditolak',
+          text: 'Akun Anda tidak memiliki hak akses administrator.',
+          confirmButtonColor: '#dc2626'
+        }).then(() => {
+          logoutUser();
+        });
+        return;
+      }
+
+      // User is verified admin/author
+      userEmailEl.innerText = `${user.email} (${role.toUpperCase()})`;
+      loginBox.classList.add('hidden');
+      hubBox.classList.remove('hidden');
+    });
+
+    document.getElementById('formAdminAuth').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit-auth');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Memeriksa Akses...';
+
+      const email = document.getElementById('inputAdminEmail').value.trim();
+      const pass = document.getElementById('inputAdminPassword').value;
+
+      try {
+        await loginWithEmail(email, pass);
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Masuk',
+          text: err.message,
+          confirmButtonColor: '#dc2626'
+        });
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-key mr-1.5"></i> Masuk Panel Admin';
+      }
+    };
+
+    document.getElementById('btn-google-auth').onclick = async () => {
+      try {
+        await loginWithGoogle();
+      } catch (err) {
+        console.warn("Google admin error:", err);
+      }
+    };
+
+    window.handleLogout = async () => {
+      if (confirm("Keluar dari sesi Administrator?")) {
+        await logoutUser();
+        window.location.reload();
+      }
+    };
+  </script>
+</body>
+</html>

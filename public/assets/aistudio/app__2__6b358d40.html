@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pradupta App</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#dc2626">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="https://pradupta.github.io/web/img/logo.png">
+     <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker Registered'))
+                    .catch(err => console.log('Service Worker Failed', err));
+            });
+        }
+    </script>
+    <link rel="icon" type="image/png" href="https://pradupta.github.io/web/img/logo.png">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Pacifico&family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; margin: 0; padding-bottom: 80px; }
+        .header-app { background: linear-gradient(135deg, #dc2626 0%, #991b1b 100%); border-radius: 0 0 30px 30px; }
+
+        .btn-back {
+            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(10px); color: white;
+            padding: 8px 16px; border-radius: 12px; font-size: 11px; font-weight: 800;
+            text-transform: uppercase; border: 1px solid rgba(255, 255, 255, 0.3);
+            display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s;
+        }
+        .btn-back:active { background: rgba(255, 255, 255, 0.4); transform: scale(0.95); }
+
+        .page-content { display: none; animation: fadeIn 0.3s ease-out; }
+        .page-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .menu-card { background: white; border-radius: 20px; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+        .menu-card:active { transform: scale(0.92); background-color: #f1f5f9; }
+        .nav-item { color: #94a3b8; transition: 0.3s; }
+        .nav-item.active { color: #dc2626; }
+        .news-item { border-left: 4px solid #dc2626; background: white; cursor: pointer; }
+        .content-area { font-size: 1rem; line-height: 1.8; color: #334155; text-align: justify; }
+        .content-area p { margin-bottom: 1.2rem; }
+        
+        .proker-card { background: white; border-radius: 20px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); transition: all 0.3s ease; height: 100%; display: flex; flex-direction: column; }
+        .proker-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+
+        /* Form styling */
+        .form-input { width: 100%; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 12px; outline: none; transition: all 0.2s; }
+        .form-input:focus { border-color: #dc2626; box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1); }
+
+        /* WYSIWYG Editor Styling */
+        .editor-toolbar { border: 1px solid #e2e8f0; border-bottom: none; border-radius: 12px 12px 0 0; background: #f8fafc; padding: 8px; display: flex; gap: 10px; }
+        .editor-btn { padding: 5px 10px; border-radius: 6px; background: white; border: 1px solid #e2e8f0; font-size: 12px; cursor: pointer; }
+        .editor-btn:hover { background: #fee2e2; }
+        #isi-editor { min-height: 200px; border: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; padding: 12px; outline: none; background: white; }
+        
+        /* Tab Styling */
+        .tab-btn { padding: 10px 20px; font-weight: bold; font-size: 12px; border-bottom: 2px solid transparent; }
+        .tab-btn.active { border-bottom: 2px solid #dc2626; color: #dc2626; }
+
+        /* --- STYLE TAMBAHAN ABSEN --- */
+        .camera-box { border-radius: 1.5rem; overflow: hidden; background: #000; aspect-ratio: 4/3; position: relative; border: 2px solid #e2e8f0; }
+        #video-absen { width: 100%; height: 100%; object-fit: cover; }
+        .mirror { transform: scaleX(-1); }
+        #map-absen { height: 160px; border-radius: 1.5rem; width: 100%; border: 1px solid #e2e8f0; margin-top: 10px; }
+        #loader-absen { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9999; flex-direction: column; align-items: center; justify-content: center; }
+        .spinner { width: 40px; height: 40px; border: 3px solid #fecaca; border-top: 3px solid #dc2626; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .hidden-element { display: none !important; }
+
+        /* --- STYLE PENDAFTARAN ANGGOTA --- */
+        #page-daftar-baru { background-color: ; color: #fff; font-family: 'Poppins', sans-serif; margin-bottom: -80px; padding-bottom: 100px; }
+        .logo-text-daftar { font-family: 'Pacifico', cursive; color: #DC143C; }
+        .form-card { 
+            background: #ffffff; color: #1a1a1a; border-radius: 1.5rem; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5); border-left: 6px solid #DC143C;
+            margin-bottom: 2rem; padding: 1.5rem;
+        }
+        .input-field-daftar {
+            width: 100%; padding: 0.75rem 1rem; border-radius: 0.75rem;
+            border: 1px solid #e2e8f0; background: #f8fafc; transition: all 0.3s; font-size: 14px;
+        }
+        
+        .input-field-daftar:focus { outline: none; border-color: #DC143C; }
+        .label-daftar { font-size: 0.7rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 0.4rem; display: block; }
+        .section-header-daftar { display: flex; align-items: center; gap: 0.6rem; font-weight: 700; font-size: 1.1rem; margin-bottom: 1.5rem; color: #0f172a; border-bottom: 2px solid #f1f5f9; padding-bottom: 0.5rem; }
+        .val-text { font-size: 0.65rem; transition: color 0.3s; margin-top: 2px; }
+        .invalid { color: #94a3b8; }
+        .valid { color: #10b981; font-weight: bold; }
+        /* Efek Animasi Shimmer */
+@keyframes shimmer {
+    0% {
+        background-position: -468px 0;
+    }
+    100% {
+        background-position: 468px 0;
+    }
+}
+
+.skeleton {
+    background: #f6f7f8;
+    background-image: linear-gradient(
+        to right,
+        #f6f7f8 0%,
+        #edeef1 20%,
+        #f6f7f8 40%,
+        #f6f7f8 100%
+    );
+    background-repeat: no-repeat;
+    background-size: 800px 104px; /* Ukuran gradient */
+    display: inline-block;
+    position: relative;
+    animation: shimmer 1.2s linear infinite forwards;
+    border-radius: 8px;
+}
+
+/* Ukuran spesifik untuk elemen skeleton */
+.skeleton-img {
+    width: 80px;
+    height: 80px;
+}
+
+.skeleton-title {
+    width: 100%;
+    height: 18px;
+    margin-bottom: 8px;
+}
+
+.skeleton-text {
+    width: 40%;
+    height: 12px;
+}
+    </style>
+</head>
+<body>
+
+    <div id="loader-absen">
+        <div class="spinner"></div>
+        <p class="mt-4 text-[10px] font-bold text-red-600 uppercase tracking-widest">Mengirim Data...</p>
+    </div>
+
+    <header class="header-app p-8 pb-14 text-white">
+        <div class="flex justify-between items-center max-w-4xl mx-auto relative">
+            <div id="header-text">
+                <p class="text-xs opacity-70">Selamat Datang di</p>
+                <h1 class="text-xl font-extrabold tracking-tight">SCOUT DUPTA</h1>
+            </div>
+            <button id="global-back" onclick="goBack()" class="btn-back hidden">
+                <i class="fas fa-arrow-left"></i> KEMBALI
+            </button>
+            <img src="https://pradupta.github.io/web/img/logo.png" class="w-12 h-12 drop-shadow-lg">
+        </div>
+    </header>
+
+    <main class="px-6 -mt-8 max-w-4xl mx-auto">
+
+        <div id="page-home" class="page-content active">
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-4">
+                <button onclick="showPage('page-about')" class="menu-card p-4 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mb-2"><i class="fas fa-info-circle text-lg"></i></div>
+                    <span class="text-[10px] font-bold uppercase">About</span>
+                </button>
+                <button onclick="showPage('page-berita')" class="menu-card p-4 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center mb-2"><i class="fas fa-newspaper text-lg"></i></div>
+                    <span class="text-[10px] font-bold uppercase">Berita</span>
+                </button>
+                <button onclick="window.location.href='proker.html'" class="menu-card p-4 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center mb-2"><i class="fas fa-tasks text-lg"></i></div>
+                    <span class="text-[10px] font-bold uppercase">Proker</span>
+                </button>
+                <button onclick="checkAuthAndRedirect()" class="menu-card p-4 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center mb-2"><i class="fas fa-pen text-lg"></i></div>
+                    <span class="text-[10px] font-bold uppercase">Artikel</span>
+                </button>
+                <button onclick="showAbsenPage()" class="menu-card p-4 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center mb-2"><i class="fas fa-camera-retro text-lg"></i></div>
+                    <span class="text-[10px] font-bold uppercase">Absen</span>
+                </button>
+                <button onclick="showPage('page-daftar-baru')" class="menu-card p-4 flex flex-col items-center">
+                    <div class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-2xl flex items-center justify-center mb-2"><i class="fas fa-user-plus text-lg"></i></div>
+                    <span class="text-[10px] font-bold uppercase">Daftar</span>
+                </button>
+            </div>
+            <div class="mt-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="font-bold text-gray-800">Berita Terbaru</h3>
+                    <button onclick="showPage('page-berita')" class="text-xs text-red-600 font-bold">Lihat Semua</button>
+                </div>
+                <div id="latest-news-home" class="grid grid-cols-1 md:grid-cols-2 gap-3"></div>
+            </div>
+        </div>
+
+        <div id="page-absen" class="page-content">
+            <div class="bg-white p-6 rounded-3xl shadow-sm space-y-4">
+                <div class="flex items-center gap-3 mb-2">
+                    <div class="w-10 h-10 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center"><i class="fas fa-fingerprint"></i></div>
+                    <div>
+                        <h2 class="text-lg font-bold">Presensi Digital</h2>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Lengkapi data kehadiran</p>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <select id="class-select" onchange="filterSiswa()" class="form-input text-xs font-bold"></select>
+                    <select id="student-select" class="form-input text-xs font-bold"></select>
+                    <select id="status-select" onchange="toggleCam()" class="form-input text-xs font-black text-red-600">
+                        <option value="Hadir">HADIR (Wajib Foto)</option>
+                        <option value="Sakit">SAKIT</option>
+                        <option value="Izin">IZIN</option>
+                        <option value="Alpa">ALPA</option>
+                        <option value="Terlambat">TERLAMBAT</option>
+                    </select>
+                    <div id="camera-section" class="camera-box">
+                        <video id="video-absen" class="mirror" autoplay playsinline muted></video>
+                    </div>
+                    <div id="ket-section" class="hidden-element">
+                        <textarea id="keterangan-absen" class="form-input h-20 text-xs" placeholder="Tulis alasan..."></textarea>
+                    </div>
+                    <div id="map-absen"></div>
+                    <button onclick="kirimAbsensi()" class="w-full py-4 bg-red-600 text-white font-extrabold rounded-2xl shadow-lg uppercase text-xs tracking-widest">Kirim Presensi</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-daftar-baru" class="page-content -mx-6 px-6 pt-10">
+            <header class="text-center mb-10">
+                <div class="logo-text-daftar text-5xl mb-2">ScoutDupta</div>
+                <p class="text-gray-400 tracking-widest uppercase text-[10px] font-bold">SMAN 20 Kabupaten Tangerang</p>
+            </header>
+
+            <form id="registration-form-baru">
+                <div class="form-card">
+                    <div class="section-header-daftar"><i class="fas fa-user text-red-600"></i> I. Data Pribadi</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div><label class="label-daftar">Nama Panggilan</label><input type="text" name="nama_singkat" required class="input-field-daftar"></div>
+                        <div><label class="label-daftar">Nama Lengkap</label><input type="text" name="nama_lengkap" required class="input-field-daftar"></div>
+                        <div><label class="label-daftar">Jenis Kelamin</label>
+                            <select name="jenis_kelamin" required class="input-field-daftar">
+                                <option value="">Pilih</option><option value="Laki-laki">Laki-laki</option><option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                        <div><label class="label-daftar">Agama</label>
+                            <select name="agama" required class="input-field-daftar">
+                                <option value="">Pilih Agama</option>
+                                <option value="Islam">Islam</option><option value="Kristen Protestan">Kristen Protestan</option>
+                                <option value="Katolik">Katolik</option><option value="Hindu">Hindu</option>
+                                <option value="Buddha">Buddha</option><option value="Konghucu">Konghucu</option>
+                            </select>
+                        </div>
+                        <div><label class="label-daftar">Tempat Lahir</label><input type="text" name="tempat_lahir" required class="input-field-daftar"></div>
+                        <div><label class="label-daftar">Tanggal Lahir</label><input type="date" name="tanggal_lahir" required class="input-field-daftar"></div>
+                    </div>
+                </div>
+
+                <div class="form-card" style="border-left-color: #1a1a1a">
+                    <div class="section-header-daftar"><i class="fas fa-map-marker-alt text-red-600"></i> II. Domisili</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div><label class="label-daftar">Provinsi</label><select id="provinsi" name="provinsi" required class="input-field-daftar"><option value="">Pilih</option></select></div>
+                        <div><label class="label-daftar">Kota/Kab</label><select id="kabkota" name="kabkota" required class="input-field-daftar"><option value="">Pilih</option></select></div>
+                        <div><label class="label-daftar">Kecamatan</label><select id="kecamatan" name="kecamatan" required class="input-field-daftar"><option value="">Pilih</option></select></div>
+                        <div><label class="label-daftar">Kelurahan</label><select id="kelurahan" name="kelurahan" required class="input-field-daftar"><option value="">Pilih</option></select></div>
+                        <div><label class="label-daftar">Kode Pos</label><input type="number" name="kode_pos" required class="input-field-daftar"></div>
+                        <div><label class="label-daftar">Alamat Lengkap</label><input type="text" name="alamat_lengkap" required class="input-field-daftar"></div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="section-header-daftar"><i class="fas fa-id-card text-red-600"></i> III. Sekolah & Kontak</div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div><label class="label-daftar">Kelas</label><select name="kelas" required class="input-field-daftar"><option value="">Pilih</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></div>
+                        <div><label class="label-daftar">Email</label><input type="email" name="email" required class="input-field-daftar"></div>
+                        <div><label class="label-daftar">WhatsApp</label><input type="tel" name="no_wa" required class="input-field-daftar"></div>
+                    </div>
+                </div>
+
+                <div class="form-card" style="border-left-color: #1a1a1a">
+                    <div class="section-header-daftar"><i class="fas fa-star text-red-600"></i> IV. Minat & Bakat</div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div><label class="label-daftar">Hobi</label><input type="text" name="hobi" class="input-field-daftar"></div>
+                        <div><label class="label-daftar">Cita-cita</label><input type="text" name="cita_cita" class="input-field-daftar"></div>
+                        <div><label class="label-daftar">Motto</label><input type="text" name="motto" class="input-field-daftar"></div>
+                        <div><label class="label-daftar">Alasan Bergabung</label><input type="text" name="alasan" class="input-field-daftar"></div>
+                    </div>
+                </div>
+
+                <div class="form-card">
+                    <div class="section-header-daftar"><i class="fas fa-shield-alt text-red-600"></i> V. Berkas & Sandi</div>
+                    <div class="grid grid-cols-1 gap-5">
+                        <div><label class="label-daftar">Pas Foto</label><input type="file" id="pas_foto_baru" accept="image/*" required class="input-field-daftar"></div>
+                        <div>
+                            <label class="label-daftar">Password Akun</label>
+                            <input type="password" name="password" id="password_baru" required class="input-field-daftar" placeholder="Ketik Password...">
+                            <div class="mt-2 grid grid-cols-2 gap-1 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                                <div id="len_b" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Min 8 Karakter</div>
+                                <div id="upp_b" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Huruf Besar</div>
+                                <div id="low_b" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Huruf Kecil</div>
+                                <div id="num_b" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Angka</div>
+                                <div id="sym_b" class="val-text invalid"><i class="fas fa-circle text-[6px]"></i> Simbol</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center pb-10">
+                    <button type="submit" id="submit-btn-baru" class="bg-red-600 hover:bg-red-700 text-white font-bold px-12 py-4 rounded-2xl shadow-xl transition-all inline-flex items-center gap-3 w-full justify-center">
+                        <span>DAFTAR SEKARANG</span> <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="page-about" class="page-content">
+            <div class="bg-white p-6 rounded-3xl shadow-sm text-center">
+                <img src="https://pradupta.github.io/web/img/logo.png" class="w-24 mx-auto mb-4">
+                <h2 class="text-xl font-bold mb-2">Visi & Misi</h2>
+                <div class="text-left text-sm text-gray-600 space-y-4">
+                    <p><b>Visi:</b> Menjadikan anggota Pramuka berilmu dan berpengetahuan luas...</p>
+                    <p><b>Misi:</b> Memberikan ilmu kepramukaan terhadap kaum muda...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-berita" class="page-content">
+            <h2 class="text-xl font-bold mb-4 px-2">Kabar Dupta</h2>
+            <div id="all-news-list" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+        </div>
+
+<div id="page-detail" class="page-content">
+    <div class="bg-white p-5 rounded-3xl shadow-sm">
+        <div class="flex justify-between items-start gap-4 mb-3">
+            <h1 id="det-title" class="text-xl font-extrabold leading-tight text-slate-900"></h1>
+            <button onclick="shareBerita()" class="w-10 h-10 bg-slate-50 text-slate-600 rounded-2xl flex items-center justify-center flex-shrink-0 border border-slate-100 active:scale-90 transition-transform">
+                <i class="fas fa-share-alt text-lg"></i>
+            </button>
+        </div>
+
+        <div class="flex flex-wrap gap-4 text-[10px] text-gray-400 mb-5 border-b pb-3 uppercase font-bold tracking-wider">
+            <span><i class="far fa-calendar-alt text-red-600 mr-1"></i> <span id="det-date"></span></span>
+            <span><i class="far fa-user text-red-600 mr-1"></i> <span id="det-author"></span></span>
+            <span><i class="far fa-eye text-red-600 mr-1"></i> <span id="det-views">0</span> VIEWS</span>
+        </div>
+        
+        <img id="det-image" src="" class="w-full rounded-2xl mb-6 shadow-sm border border-slate-100">
+        <div id="det-body" class="content-area"></div>
+        <div id="det-pdf" class="mt-6"></div>
+        <div id="det-body"></div>
+<div id="pdf-container"></div>
+    </div>
+</div>
+
+        
+         <div id="page-login" class="page-content">
+            <div class="bg-white p-8 rounded-3xl shadow-sm max-w-sm mx-auto">
+                <h2 class="text-xl font-bold text-center mb-6">Login Penulis</h2>
+                <form id="loginForm" class="space-y-4">
+                    <input type="email" name="email" id="emailInput" class="form-input text-sm" placeholder="Email" required>
+                    <input type="password" name="password" id="passwordInput" class="form-input text-sm" placeholder="Password" required>
+                    <button type="submit" id="btnLogin" class="w-full py-3 bg-red-600 text-white font-bold rounded-xl text-sm shadow-lg">MASUK</button>
+                </form>
+                <p class="text-center text-xs mt-6">Belum punya akun? <a href="javascript:void(0)" onclick="showPage('page-register')" class="text-red-600 font-bold">Daftar di sini</a></p>
+            </div>
+        </div>
+
+        <div id="page-register" class="page-content">
+            <div class="bg-white p-8 rounded-3xl shadow-sm max-w-sm mx-auto">
+                <h2 class="text-xl font-bold text-center mb-6 text-red-600">Daftar Akun</h2>
+                <form id="registerForm" class="space-y-3">
+                    <input type="text" name="nama" id="regNama" class="form-input text-sm" placeholder="Nama Lengkap" required>
+                    <input type="email" name="email" class="form-input text-sm" placeholder="Email" required>
+                    <input type="tel" name="telepon" class="form-input text-sm" placeholder="No. Telepon" required>
+                    <input type="password" name="password" class="form-input text-sm" placeholder="Password" required>
+                    <button type="submit" id="btnReg" class="w-full py-3 bg-red-600 text-white font-bold rounded-xl text-sm shadow-lg">DAFTAR SEKARANG</button>
+                </form>
+                <p class="text-center text-xs mt-6"><a href="javascript:void(0)" onclick="showPage('page-login')" class="text-red-600 font-bold">Sudah punya akun? Login</a></p>
+            </div>
+        </div>
+
+        <div id="page-artikel" class="page-content">
+            <div class="bg-white p-6 rounded-3xl shadow-sm">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold">Buat Artikel</h2>
+                    <button onclick="logout()" class="text-xs font-bold text-red-600"><i class="fas fa-sign-out-alt"></i> Keluar</button>
+                </div>
+                <div class="flex border-b mb-6">
+                    <button onclick="switchArtTab('edit')" id="tab-edit" class="tab-btn active">EDITOR</button>
+                    <button onclick="switchArtTab('preview')" id="tab-preview" class="tab-btn">PREVIEW</button>
+                </div>
+                <div id="art-editor-container">
+                    <form id="articleForm" class="space-y-4">
+                        <input type="text" id="judul" class="form-input" placeholder="Judul Artikel" required>
+                        <input type="text" id="penulis" class="form-input bg-gray-50 cursor-not-allowed font-bold" readonly>
+                        <div id="gambarPreview" class="border-2 border-dashed border-gray-200 rounded-2xl p-6 text-center cursor-pointer" onclick="document.getElementById('gambar').click()">
+                            <i class="fas fa-image text-2xl text-gray-300 mb-2"></i><br>
+                            <span class="text-[10px] text-gray-400 font-bold uppercase">Pilih Gambar Utama</span>
+                        </div>
+                        <input type="file" id="gambar" accept="image/*" class="hidden">
+                        <div class="editor-toolbar">
+                            <button type="button" class="editor-btn" onclick="execCmd('bold')"><b>B</b></button>
+                            <button type="button" class="editor-btn" onclick="execCmd('italic')"><i>I</i></button>
+                            <button type="button" class="editor-btn" onclick="execCmd('insertUnorderedList')">• List</button>
+                        </div>
+                        <div id="isi-editor" contenteditable="true"></div>
+                        <button type="submit" id="btnSubmitArt" class="w-full py-4 bg-red-600 text-white font-bold rounded-2xl shadow-xl uppercase tracking-widest">Publikasikan Sekarang</button>
+                    </form>
+                </div>
+                <div id="art-preview-container" class="hidden">
+                    <div class="bg-gray-50 p-4 rounded-2xl border">
+                        <h1 id="pre-title" class="text-xl font-extrabold mb-2"></h1>
+                        <p class="text-[10px] text-gray-400 mb-4 uppercase">Oleh: <span id="pre-author"></span></p>
+                        <img id="pre-image" src="" class="w-full rounded-xl mb-4 hidden">
+                        <div id="pre-body" class="content-area bg-white p-4 rounded-xl border"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-4 z-50">
+        <div class="max-w-4xl w-full flex justify-around mx-auto">
+            <button onclick="showPage('page-home')" id="nav-home" class="nav-item active flex flex-col items-center">
+                <i class="fas fa-home text-xl"></i><span class="text-[10px] mt-1 font-bold">Home</span>
+            </button>
+            <button onclick="showPage('page-berita')" id="nav-berita" class="nav-item flex flex-col items-center">
+                <i class="fas fa-newspaper text-xl"></i><span class="text-[10px] mt-1 font-bold">Berita</span>
+            </button>
+            <button onclick="showAbsenPage()" id="nav-absen" class="nav-item flex flex-col items-center">
+                <i class="fas fa-camera text-xl"></i><span class="text-[10px] mt-1 font-bold">Absen</span>
+            </button>
+        </div>
+    </nav>
+
+    <div id="success-modal" class="fixed inset-0 bg-white backdrop-blur-md hidden flex items-center justify-center z-[100] p-4">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full text-center text-gray-900 border-t-8 border-red-600">
+          <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 text-4xl"><i class="fas fa-check"></i></div>
+          <h3 class="text-2xl font-bold mb-2">Pendaftaran Berhasil!</h3>
+          <p class="text-xs text-gray-500 mb-8">Terima kasih telah bergabung bersama ScoutDupta.</p>
+          <div id="timer-box-daftar" class="bg-gray-50 border border-gray-100 rounded-2xl p-6">
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Menyiapkan Biodata Anda</p>
+            <div class="flex items-center justify-center gap-4">
+              <div class="spinner"></div>
+              <span id="countdown_b" class="text-4xl font-mono font-bold text-gray-800">01:00</span>
+            </div>
+          </div>
+         <div id="download-box-daftar" class="hidden">
+    <button onclick="window.location.href='login.html'" class="w-full bg-red-600 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-3 shadow-lg">
+        <i class="fas fa-file-download"></i> AKSES BIODATA
+    </button>
+</div>
+        </div>
+    </div>
+
+    <canvas id="canvas-absen" class="hidden"></canvas>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        const scriptURL = 'https://script.google.com/macros/s/AKfycbycJzXx1UFjx-bUjyR2pVOXi2fSvRjHiHbkdCk1yh7EQcnMfldmsUxEpREMSfoggDjtrw/exec';
+        const scriptURL_Auth = 'https://script.google.com/macros/s/AKfycbzbpW0ISEpCN8GUiJ03WgkPdxvoM_lOCRWB48tzrC75Sag-XWtlBZgqUHmv-uwlavG-yw/exec';
+        const ABSEN_URL = "https://script.google.com/macros/s/AKfycbx_YYxl1DM_rpfznIy6Mu7UYlKSZO1edqxDR1K6lVAJqy3oEXDUabe74HQbtsF4g61XHA/exec";
+        const APPS_SCRIPT_DAFTAR_URL = 'https://script.google.com/macros/s/AKfycbxGEn6Bhmc9yAzmITjCCdslxGLWq0rdZQDm3Mko-SWGFxdrffbUuiGiUgLk6crA9HB5/exec';
+
+        let globalNewsData = [];
+        let currentPage = 'page-home';
+        let base64Image = "";
+        let absenConfig = null;
+        let mapObj = null;
+        let absenCoords = { lat: 0, lng: 0 };
+
+        function showPage(pageId) {
+            currentPage = pageId;
+            $('.page-content').removeClass('active').hide();
+            $('#' + pageId).addClass('active').show();
+            
+            if(pageId === 'page-home') {
+                $('#header-text').removeClass('hidden');
+                $('#global-back').addClass('hidden');
+            } else {
+                $('#header-text').addClass('hidden');
+                $('#global-back').removeClass('hidden');
+            }
+
+            $('.nav-item').removeClass('active');
+            if(pageId === 'page-home') $('#nav-home').addClass('active');
+            if(pageId === 'page-berita' || pageId === 'page-detail') $('#nav-berita').addClass('active');
+            if(pageId === 'page-absen') $('#nav-absen').addClass('active');
+            
+            if(pageId !== 'page-absen') stopCamera();
+            window.scrollTo(0,0);
+        }
+
+        function goBack() {
+            if(currentPage === 'page-detail') showPage('page-berita');
+            else showPage('page-home');
+        }
+
+async function fetchNews() {
+    const homeContainer = $('#latest-news-home');
+    const listContainer = $('#all-news-list');
+
+    // 1. CEK CACHE: Ambil data lama dari memori HP
+    const cachedData = localStorage.getItem("cached_news");
+    if (cachedData) {
+        globalNewsData = JSON.parse(cachedData);
+        renderNews(globalNewsData); // Tampilkan secara instan
+    } else {
+        // Jika tidak ada cache, tampilkan skeleton loading
+        renderSkeleton(homeContainer);
+        renderSkeleton(listContainer);
+    }
+
+    try {
+        // 2. FETCH DATA BARU: Ambil dari Google Apps Script
+        const response = await fetch(`${scriptURL}?t=${new Date().getTime()}`);
+        const data = await response.json();
+        
+        // 3. UPDATE CACHE & UI: Simpan data baru dan perbarui tampilan
+        globalNewsData = data; 
+        localStorage.setItem("cached_news", JSON.stringify(data));
+        renderNews(data);      
+        
+        // Cek Deep Linking setelah data siap
+        checkDeepLinking();
+
+    } catch (e) { 
+        console.error("Gagal memuat berita terbaru", e); 
+    }
+}
+
+// Fungsi tambahan untuk Deep Linking agar lebih rapi
+function checkDeepLinking() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const newsID = urlParams.get('news');
+    if (newsID && globalNewsData.length > 0) {
+        const indexBerita = globalNewsData.findIndex(row => row[6] == newsID);
+        if (indexBerita !== -1) {
+            setTimeout(() => openDetail(indexBerita), 200);
+        }
+    }
+}
+function renderSkeleton(container) {
+    let html = '';
+    for (let i = 0; i < 4; i++) {
+        html += `
+            <div class="news-item flex p-3 gap-4 animate-pulse">
+                <div class="w-20 h-20 bg-gray-200 rounded-lg"></div>
+                <div class="flex-1">
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div class="h-3 bg-gray-200 rounded w-1/4"></div>
+                </div>
+            </div>`;
+    }
+    container.html(html);
+}
+
+function renderNews(data = null) {
+    const homeContainer = $('#latest-news-home');
+    const listContainer = $('#all-news-list');
+
+    // --- 1. KONDISI LOADING (SKELETON) ---
+    if (!data || data.length === 0) {
+        let skeletonHtml = '';
+        for (let i = 0; i < 4; i++) {
+            skeletonHtml += `
+                <div class="news-item flex p-3 gap-4 items-center animate-pulse">
+                    <div class="skeleton skeleton-img w-20 h-20 bg-gray-200 rounded-lg flex-shrink-0"></div>
+                    <div class="flex-1">
+                        <div class="skeleton skeleton-title h-4 bg-gray-200 rounded w-full mb-2"></div>
+                        <div class="skeleton skeleton-text h-3 bg-gray-200 rounded w-1/3"></div>
+                    </div>
+                </div>`;
+        }
+        homeContainer.html(skeletonHtml);
+        listContainer.html(skeletonHtml);
+        return; // Keluar dari fungsi agar tidak menghapus skeleton sebelum data siap
+    }
+
+    // --- 2. KONDISI DATA SIAP (BERITA ASLI) ---
+    homeContainer.empty(); 
+    listContainer.empty();
+
+    data.forEach((row, index) => {
+        // Format tanggal Indonesia: 23 Feb 2026
+        const dateClean = new Date(row[0]).toLocaleDateString('id-ID', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+
+        // Template Berita
+        const html = `
+            <div class="news-item flex p-3 rounded-xl shadow-sm items-center gap-4 cursor-pointer hover:bg-gray-50 transition" onclick="openDetail(${index})">
+                <img src="${row[4] || 'https://via.placeholder.com/150'}" 
+                     class="w-20 h-20 object-cover rounded-lg bg-gray-100" 
+                     onerror="this.src='https://via.placeholder.com/150'"
+                     loading="lazy">
+                <div class="flex-1">
+                    <h4 class="font-bold text-sm line-clamp-2 text-slate-800">${row[1]}</h4>
+                    <p class="text-[10px] text-gray-400 mt-1 uppercase">${dateClean}</p>
+                </div>
+            </div>`;
+
+        // Masukkan ke Home (Maksimal 4 berita terbaru)
+        if(index < 4) homeContainer.append(html);
+        
+        // Masukkan ke Daftar Semua Berita
+        listContainer.append(html);
+    });
+}
+async function openDetail(index) {
+    const article = globalNewsData[index];
+    if(!article) return;
+
+    // Simpan Original ID untuk fitur Share
+    window.currentOriginalID = article[6]; 
+
+    // Mapping Data ke UI
+    $('#det-title').text(article[1]);
+    $('#det-date').text(new Date(article[0]).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+    $('#det-author').text(article[2] || 'Admin');
+    
+    // Tampilkan views + 1 secara instan di UI
+    const currentViews = parseInt(article[5] || 0);
+    $('#det-views').text(currentViews + 1);
+    
+    $('#det-image').attr('src', article[4]);
+    $('#det-body').html(article[3]);
+
+   
+    // Pindah ke halaman detail
+    showPage('page-detail');
+
+    // Update view ke Apps Script (Background process)
+    try {
+        fetch(`${scriptURL}?action=updateView&readID=${article[6]}`, { mode: 'no-cors' });
+    } catch (e) {
+        console.log("Gagal update views");
+    }
+}
+
+async function shareBerita() {
+    const judul = $('#det-title').text();
+    const baseURL = window.location.href.split('?')[0];
+    const shareURL = `${baseURL}?news=${window.currentOriginalID}`;
+
+    const textShare = `📢 *BERITA SCOUT DUPTA* 📢\n\n"${judul}"\n\nBaca selengkapnya di sini:\n${shareURL}`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: judul,
+            text: textShare,
+            url: shareURL
+        }).catch(err => console.log("Share dibatalkan"));
+    } else {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(textShare)}`, '_blank');
+    }
+}
+
+// --- INITIALIZATION ---
+$(document).ready(function() { 
+    // Load data utama
+    fetchNews();
+    
+    // Inisialisasi data wilayah (Provinsi/Kota)
+    if (typeof initRegions === "function") {
+        initRegions();
+    }
+});
+// Tambahkan ini di bagian bawah Kode 2 sebelum tag penutup
+function checkAuthAndRedirect() {
+            if (localStorage.getItem("isLoggedIn") === "true") {
+                $('#penulis').val(localStorage.getItem("namaUser") || "Penulis Dupta");
+                showPage('page-artikel');
+            } else { showPage('page-login'); }
+        }
+
+        function logout() { localStorage.clear(); showPage('page-home'); }
+
+        $('#registerForm').submit(function(e) {
+            e.preventDefault();
+            const btn = $('#btnReg');
+            const nama = $('#regNama').val();
+            btn.html('<i class="fas fa-spinner fa-spin"></i>').prop('disabled', true);
+            const formData = new URLSearchParams(new FormData(this));
+            formData.append('action', 'register');
+            fetch(scriptURL_Auth, { method: 'POST', body: formData, mode: 'no-cors' }).then(() => {
+                localStorage.setItem("namaUser", nama);
+                Swal.fire('Berhasil', 'Pendaftaran terkirim! Silakan login.', 'success');
+                showPage('page-login');
+            }).finally(() => { btn.html('DAFTAR SEKARANG').prop('disabled', false); });
+        });
+
+        $('#loginForm').submit(function(e) {
+            e.preventDefault();
+            const btn = $('#btnLogin');
+            btn.html('MEMPROSES...').prop('disabled', true);
+            const formData = new URLSearchParams(new FormData(this));
+            formData.append('action', 'login');
+            fetch(scriptURL_Auth, { method: 'POST', body: formData, mode: 'no-cors' }).then(() => {
+                localStorage.setItem("isLoggedIn", "true");
+                if(!localStorage.getItem("namaUser")) {
+                    localStorage.setItem("namaUser", $('#emailInput').val().split('@')[0]);
+                }
+                checkAuthAndRedirect();
+            }).finally(() => { btn.html('MASUK').prop('disabled', false); });
+        });
+
+        // --- EDITOR & PREVIEW LOGIC ---
+        function execCmd(command) { document.execCommand(command, false, null); }
+
+        function switchArtTab(tab) {
+            $('.tab-btn').removeClass('active');
+            if(tab === 'edit') {
+                $('#tab-edit').addClass('active');
+                $('#art-editor-container').removeClass('hidden');
+                $('#art-preview-container').addClass('hidden');
+            } else {
+                $('#tab-preview').addClass('active');
+                $('#art-editor-container').addClass('hidden');
+                $('#art-preview-container').removeClass('hidden');
+                $('#pre-title').text($('#judul').val() || "Tanpa Judul");
+                $('#pre-author').text($('#penulis').val());
+                $('#pre-body').html($('#isi-editor').html() || "Belum ada isi...");
+                if(base64Image) $('#pre-image').attr('src', base64Image).removeClass('hidden');
+            }
+        }
+
+        $('#gambar').change(function(e) {
+            const file = e.target.files[0];
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const scale = 800 / img.width;
+                    canvas.width = 800;
+                    canvas.height = img.height * scale;
+                    const ctxObj = canvas.getContext('2d');
+                    ctxObj.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    base64Image = canvas.toDataURL('image/jpeg', 0.7);
+                    $('#gambarPreview').html(`<img src="${base64Image}" class="max-h-40 mx-auto rounded-xl">`);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        $('#articleForm').submit(async function(e) {
+            e.preventDefault();
+            const content = $('#isi-editor').html();
+            if(!content || content === "<br>") return Swal.fire('Error', 'Isi artikel kosong!', 'error');
+            Swal.fire({ title: 'Mengirim...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+            const formData = new URLSearchParams();
+            formData.append('tanggal', new Date().toLocaleDateString('id-ID'));
+            formData.append('judul', $('#judul').val());
+            formData.append('penulis', $('#penulis').val());
+            formData.append('isi', content);
+            formData.append('gambar', base64Image);
+            try {
+                await fetch(scriptURL, { method: 'POST', body: formData, mode: 'no-cors' });
+                Swal.fire('Berhasil', 'Artikel terbit!', 'success').then(() => location.reload());
+            } catch (e) { Swal.fire('Gagal', 'Error.', 'error'); }
+        });
+
+        // --- FETCH NEWS ---
+        async function fetchNews() {
+    try {
+        const response = await fetch(`${scriptURL}?t=${new Date().getTime()}`);
+        const data = await response.json();
+        globalNewsData = data; // Simpan ke variabel global
+        renderNews(data);      // Tampilkan daftar berita
+        
+        // --- TAMBAHKAN LOGIKA INI DI SINI ---
+        const urlParams = new URLSearchParams(window.location.search);
+        const newsID = urlParams.get('news');
+        if (newsID) {
+            const indexBerita = globalNewsData.findIndex(row => row[6] == newsID);
+            if (indexBerita !== -1) {
+                openDetail(indexBerita);
+            }
+        }
+    } catch (e) { 
+        console.error("Gagal memuat berita", e); 
+    }
+}
+
+        function renderNews(data) {
+            const homeContainer = $('#latest-news-home');
+            const listContainer = $('#all-news-list');
+            homeContainer.empty(); listContainer.empty();
+            data.forEach((row, index) => {
+                const dateClean = new Date(row[0]).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+                const html = `<div class="news-item flex p-3 rounded-xl shadow-sm items-center gap-4" onclick="openDetail(${index})">
+                    <img src="${row[4]}" class="w-20 h-20 object-cover rounded-lg">
+                    <div class="flex-1"><h4 class="font-bold text-sm line-clamp-2 text-slate-800">${row[1]}</h4><p class="text-[10px] text-gray-400 mt-1 uppercase">${dateClean}</p></div>
+                </div>`;
+                if(index < 4) homeContainer.append(html);
+                listContainer.append(html);
+            });
+        }
+
+       async function openDetail(index) {
+    const article = globalNewsData[index];
+    if(!article) return;
+
+    // SIMPAN ID UNTUK SHARE (Kolom ke-7/index 6 adalah Original ID)
+    window.currentOriginalID = article[6]; 
+
+    $('#det-title').text(article[1]);
+    $('#det-date').text(new Date(article[0]).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' }));
+    $('#det-author').text(article[2] || 'Admin');
+    
+    // Tampilkan views + 1 secara instan di UI
+    const currentViews = parseInt(article[5] || 0);
+    $('#det-views').text(currentViews + 1);
+    
+    $('#det-image').attr('src', article[4]);
+    $('#det-body').html(article[3]);
+
+    // Berpindah ke halaman detail
+    showPage('page-detail');
+        // --- LOGIKA PDF SESUAI KEINGINAN LO ---
+            const pdfContainer = document.getElementById('pdf-container');
+            if (row[1].toLowerCase().includes("arah kebijakan")) {
+                // Ambil link drive dari isi berita (row[3]) dan pastikan pakai /preview
+                let driveUrl = row[3].trim().replace('/view?usp=sharing', '/preview').replace('/view', '/preview');
+
+                pdfContainer.innerHTML = `
+                  <div class="mt-12 border-t-4 border-red-600 pt-8">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <svg class="w-6 h-6 mr-2 text-red-600" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"></path></svg>
+                        Dokumen Lampiran:
+                    </h3>
+                    <div style="position:relative; padding-top:141.4%; height:0; overflow:hidden; border-radius:12px; border:2px solid #eee;">
+                      <iframe src="https://drive.google.com/file/d/1iGIOK7EmnnUkQYiOwfqep_diOcb_hH5y/preview" 
+                              style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;" 
+                              allow="autoplay"></iframe>
+                    </div>
+                    <p class="mt-4 text-sm text-gray-500 italic">* Jika dokumen tidak muncul, pastikan Anda masuk ke akun Google.</p>
+                  </div>`;
+            } else {
+                pdfContainer.innerHTML = '';
+            }
+
+    // Update view ke Apps Script (menggunakan scriptURL yang sudah Anda definisikan)
+    try {
+        fetch(`${scriptURL}?action=updateView&readID=${article[6]}`, { mode: 'no-cors' });
+    } catch (e) {
+        console.log("Gagal update views");
+    }
+}
+async function shareBerita() {
+    const judul = $('#det-title').text();
+    // Mengambil URL dasar tanpa parameter lama
+    const baseURL = window.location.href.split('?')[0];
+    const shareURL = `${baseURL}?news=${window.currentOriginalID}`;
+
+    const textShare = `📢 *BERITA SCOUT DUPTA* 📢\n\n"${judul}"\n\nBaca selengkapnya di sini:\n${shareURL}`;
+
+    if (navigator.share) {
+        navigator.share({
+            title: judul,
+            text: textShare,
+            url: shareURL
+        }).catch(err => console.log(err));
+    } else {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(textShare)}`, '_blank');
+    }
+}
+
+$(document).ready(function() { 
+    // 1. Load semua berita dulu
+    fetchNews().then(() => {
+        // 2. Cek apakah di URL ada parameter ?news=...
+        const urlParams = new URLSearchParams(window.location.search);
+        const newsID = urlParams.get('news');
+        
+        if (newsID && globalNewsData.length > 0) {
+            // Cari berita yang ID-nya (kolom ke-6) cocok
+            const idx = globalNewsData.findIndex(a => a[6] == newsID);
+            if (idx !== -1) openDetail(idx);
+        }
+    });
+
+    initRegions();
+});
+
+        // --- ABSEN LOGIC ---
+        async function showAbsenPage() {
+            showPage('page-absen');
+            if(!absenConfig) {
+                Swal.fire({ title: 'Sinkronisasi...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
+                try {
+                    const response = await fetch(ABSEN_URL, { method: "POST", body: JSON.stringify({ action: "getAppConfig" }) });
+                    const res = await response.json();
+                    absenConfig = res.result;
+                    const classSel = document.getElementById('class-select');
+                    classSel.innerHTML = '<option value="">-- PILIH DIVISI --</option>';
+                    absenConfig.classes.forEach(c => { let o = document.createElement('option'); o.value = o.text = c; classSel.add(o); });
+                } catch(e) { Swal.fire('Error', 'Gagal koneksi backend.', 'error'); }
+                Swal.close();
+            }
+            startCamera(); initMap();
+        }
+
+        function filterSiswa() {
+            const kls = $('#class-select').val();
+            const stuSel = document.getElementById('student-select');
+            stuSel.innerHTML = '<option value="">-- PILIH NAMA --</option>';
+            if(absenConfig) {
+                absenConfig.students.filter(s => s.kelas == kls).forEach(s => {
+                    let o = document.createElement('option'); o.value = o.text = s.nama; stuSel.add(o);
+                });
+            }
+        }
+
+        async function startCamera() {
+            const video = document.getElementById('video-absen');
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                video.srcObject = s;
+            } catch (e) { console.log("Cam Error"); }
+        }
+
+        function stopCamera() {
+            const v = document.getElementById('video-absen');
+            if (v && v.srcObject) v.srcObject.getTracks().forEach(t => t.stop());
+        }
+
+        function toggleCam() {
+            const s = $('#status-select').val();
+            if(s === 'Hadir' || s === 'Terlambat') { $('#camera-section').show(); $('#ket-section').addClass('hidden-element'); } 
+            else { $('#camera-section').hide(); $('#ket-section').removeClass('hidden-element'); }
+        }
+
+        function initMap() {
+            navigator.geolocation.getCurrentPosition(p => {
+                absenCoords = { lat: p.coords.latitude, lng: p.coords.longitude };
+                if(!mapObj) {
+                    mapObj = L.map('map-absen',{zoomControl:false, attributionControl:false}).setView([absenCoords.lat, absenCoords.lng], 16);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(mapObj);
+                    L.marker([absenCoords.lat, absenCoords.lng]).addTo(mapObj);
+                } else { mapObj.setView([absenCoords.lat, absenCoords.lng], 16); }
+            }, null, { enableHighAccuracy: true });
+        }
+
+        async function kirimAbsensi() {
+    const name = $('#student-select').val();
+    const kls = $('#class-select').val();
+    const status = $('#status-select').val();
+    
+    if(!name || !kls || !status) return Swal.fire('Peringatan', 'Lengkapi data!', 'warning');
+    
+    $('#loader-absen').css('display', 'flex');
+    let photo = "-";
+    
+    // Ambil foto jika status Hadir atau Terlambat
+    if(status === 'Hadir' || status === 'Terlambat') {
+        const canv = document.getElementById('canvas-absen');
+        const vid = document.getElementById('video-absen');
+        canv.width = vid.videoWidth; 
+        canv.height = vid.videoHeight;
+        canv.getContext('2d').drawImage(vid, 0, 0);
+        photo = canv.toDataURL('image/jpeg', 0.5);
+    }
+
+    // Mendapatkan waktu sekarang untuk dikirim ke kolom 'Waktu' (data.timestamp)
+    const waktuSekarang = new Date().toLocaleString('id-ID', { 
+        timeZone: 'Asia/Jakarta',
+        dateStyle: 'medium', 
+        timeStyle: 'medium' 
+    });
+
+    // Sesuaikan payload dengan request JSON.parse(e.postData.contents) di Apps Script
+    const payload = {
+        action: "simpanAbsensi",
+        data: {
+            timestamp: waktuSekarang, // Apps Script mengharapkan data.timestamp
+            divisi: kls,
+            name: name,
+            status: status,
+            keterangan: $('#keterangan-absen').val() || "-",
+            photo: photo,
+            lat: absenCoords.lat || 0,
+            lng: absenCoords.lng || 0
+        }
+    };
+
+    try {
+        // Menggunakan mode 'cors' karena Apps Script Anda sudah mendukung JSON response
+        const response = await fetch(ABSEN_URL, { 
+            method: "POST",
+            mode: "cors", // Mengaktifkan CORS agar bisa membaca response success
+            headers: {
+                "Content-Type": "text/plain;charset=utf-8",
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const resJson = await response.json();
+
+        if(resJson.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'Berhasil',
+                text: 'Presensi telah tercatat di sistem!',
+                confirmButtonColor: '#dc2626'
+            }).then(() => {
+                location.reload(); // Refresh untuk reset form
+            });
+        } else {
+            throw new Error(resJson.error);
+        }
+    } catch(e) { 
+        console.error(e);
+        Swal.fire('Error', 'Gagal mengirim data: ' + e.message, 'error'); 
+    } finally {
+        $('#loader-absen').hide();
+    }
+}
+
+        // --- DAFTAR BARU LOGIC ---
+        const passInputB = document.getElementById('password_baru');
+        const reqB = {
+            len_b: /.{8,}/, upp_b: /[A-Z]/, low_b: /[a-z]/, num_b: /[0-9]/, sym_b: /[!@#$%^&*(),.?":{}|<>]/
+        };
+        passInputB.addEventListener('input', () => {
+            const val = passInputB.value;
+            Object.keys(reqB).forEach(k => {
+                const el = document.getElementById(k);
+                if (reqB[k].test(val)) el.classList.replace('invalid', 'valid');
+                else el.classList.replace('valid', 'invalid');
+            });
+        });
+
+        const REGIONS_API = 'https://www.emsifa.com/api-wilayah-indonesia/api';
+        async function initRegions() {
+            const res = await fetch(`${REGIONS_API}/provinces.json`);
+            const data = await res.json();
+            data.forEach(p => document.getElementById('provinsi').innerHTML += `<option value="${p.id}" data-name="${p.name}">${p.name}</option>`);
+        }
+        document.getElementById('provinsi').onchange = async function() {
+            const res = await fetch(`${REGIONS_API}/regencies/${this.value}.json`);
+            const data = await res.json();
+            const el = document.getElementById('kabkota'); el.innerHTML = '<option value="">Pilih</option>';
+            data.forEach(r => el.innerHTML += `<option value="${r.id}" data-name="${r.name}">${r.name}</option>`);
+        };
+        document.getElementById('kabkota').onchange = async function() {
+            const res = await fetch(`${REGIONS_API}/districts/${this.value}.json`);
+            const data = await res.json();
+            const el = document.getElementById('kecamatan'); el.innerHTML = '<option value="">Pilih</option>';
+            data.forEach(d => el.innerHTML += `<option value="${d.id}" data-name="${d.name}">${d.name}</option>`);
+        };
+        document.getElementById('kecamatan').onchange = async function() {
+            const res = await fetch(`${REGIONS_API}/villages/${this.value}.json`);
+            const data = await res.json();
+            const el = document.getElementById('kelurahan'); el.innerHTML = '<option value="">Pilih</option>';
+            data.forEach(v => el.innerHTML += `<option value="${v.id}" data-name="${v.name}">${v.name}</option>`);
+        };
+
+        function startTimerDaftar() {
+            let seconds = 60;
+            const interval = setInterval(() => {
+                seconds--;
+                let m = Math.floor(seconds / 60); let s = seconds % 60;
+                document.getElementById('countdown_b').innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+                if (seconds <= 0) {
+                    clearInterval(interval);
+                    document.getElementById('timer-box-daftar').classList.add('hidden');
+                    document.getElementById('download-box-daftar').classList.remove('hidden');
+                }
+            }, 1000);
+                   if (seconds <= 0) {
+    clearInterval(interval);
+    // Otomatis pindah ke file login.html
+    window.location.href = 'login.html';
+}
+        }
+
+        document.getElementById('registration-form-baru').onsubmit = async function(e) {
+            e.preventDefault();
+            const pass = passInputB.value;
+            const isAllValid = Object.values(reqB).every(reg => reg.test(pass));
+            if(!isAllValid) return Swal.fire('Error', 'Password tidak aman!', 'error');
+
+            const btn = document.getElementById('submit-btn-baru');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> MEMPROSES...';
+
+            const fileInput = document.getElementById('pas_foto_baru');
+            let fotoBase64 = ""; let fotoName = ""; let fotoMime = "";
+            if(fileInput.files[0]) {
+                fotoName = fileInput.files[0].name;
+                fotoMime = fileInput.files[0].type;
+                fotoBase64 = await new Promise(r => {
+                    const reader = new FileReader();
+                    reader.onload = () => r(reader.result.split(',')[1]);
+                    reader.readAsDataURL(fileInput.files[0]);
+                });
+            }
+
+            const getName = (id) => {
+                const el = document.getElementById(id);
+                return el.options[el.selectedIndex]?.getAttribute('data-name') || "";
+            };
+
+            const payload = {
+                nama_singkat: e.target.nama_singkat.value, nama_lengkap: e.target.nama_lengkap.value,
+                jenis_kelamin: e.target.jenis_kelamin.value, agama: e.target.agama.value,
+                tempat_lahir: e.target.tempat_lahir.value, tanggal_lahir: e.target.tanggal_lahir.value,
+                provinsi: getName('provinsi'), kabkota: getName('kabkota'), kecamatan: getName('kecamatan'), kelurahan: getName('kelurahan'),
+                kode_pos: e.target.kode_pos.value, alamat_lengkap: e.target.alamat_lengkap.value,
+                kelas: e.target.kelas.value, email: e.target.email.value, no_wa: e.target.no_wa.value,
+                hobi: e.target.hobi.value, cita_cita: e.target.cita_cita.value, motto: e.target.motto.value, alasan: e.target.alasan.value,
+                foto_base64: fotoBase64, foto_nama: fotoName, foto_mime: fotoMime, password: e.target.password.value
+            };
+
+            try {
+                await fetch(APPS_SCRIPT_DAFTAR_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                document.getElementById('success-modal').classList.remove('hidden');
+                startTimerDaftar();
+            } catch (err) { Swal.fire('Error', 'Gagal kirim data.', 'error'); btn.disabled = false; btn.innerHTML = 'DAFTAR SEKARANG'; }
+        };
+
+        $(document).ready(function() { 
+            fetchNews(); 
+            initRegions();
+            $('.page-content').hide(); 
+            $('#page-home').show(); 
+        });
+    </script>
+</body>
+</html>

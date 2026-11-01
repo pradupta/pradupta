@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Login Administrator - ScoutDupta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+</head>
+<body class="bg-slate-950 min-h-screen flex items-center justify-center p-4 text-white antialiased">
+
+  <div class="bg-slate-900 border border-slate-800 p-8 rounded-3xl shadow-2xl w-full max-w-md border-t-8 border-red-600 relative">
+    
+    <div class="text-center mb-8">
+      <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 to-rose-600 flex items-center justify-center text-white text-2xl mx-auto mb-3 shadow-lg shadow-red-600/30">
+        <i class="fas fa-user-shield"></i>
+      </div>
+      <h1 class="text-xl font-black tracking-tight">Panel Admin <span class="text-red-500">ScoutDupta</span></h1>
+      <p class="text-xs text-slate-400 mt-1">Pangkalan SMAN 20 Kabupaten Tangerang</p>
+    </div>
+
+    <form id="adminLoginForm" class="space-y-4">
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5 ml-1">Email Administrator</label>
+        <div class="relative">
+          <i class="fas fa-envelope absolute left-4 top-3.5 text-slate-500 text-xs"></i>
+          <input type="email" id="adminEmail" class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 rounded-xl pl-10 pr-4 py-3 text-xs text-white outline-none transition" placeholder="admin@scoutdupta.id" required>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] font-extrabold uppercase text-slate-400 mb-1.5 ml-1">Kata Sandi</label>
+        <div class="relative">
+          <i class="fas fa-lock absolute left-4 top-3.5 text-slate-500 text-xs"></i>
+          <input type="password" id="adminPassword" class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 rounded-xl pl-10 pr-10 py-3 text-xs text-white outline-none transition" placeholder="••••••••" required>
+          <button type="button" onclick="togglePass()" class="absolute right-3.5 top-3 text-slate-500 hover:text-white">
+            <i class="fas fa-eye text-xs" id="eye-icon"></i>
+          </button>
+        </div>
+      </div>
+
+      <button type="submit" id="btn-admin-login" class="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-lg shadow-red-600/30 active:scale-95 transition mt-2">
+        <i class="fas fa-key mr-1.5"></i> Autentikasi Masuk
+      </button>
+    </form>
+
+    <div class="relative my-6 text-center">
+      <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-800"></div></div>
+      <span class="relative px-3 bg-slate-900 text-[10px] font-extrabold text-slate-500 uppercase tracking-wider">Atau masuk dengan</span>
+    </div>
+
+    <button type="button" id="btn-google-admin" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-xs font-bold text-slate-200 flex items-center justify-center gap-2 shadow-sm active:scale-95 transition">
+      <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="w-4 h-4" alt="Google">
+      <span>Masuk Akun Google (Admin)</span>
+    </button>
+
+    <div class="mt-8 text-center">
+      <a href="/index.html" class="text-xs text-slate-500 hover:text-slate-300 transition">
+        <i class="fas fa-arrow-left mr-1"></i> Kembali ke Beranda Publik
+      </a>
+    </div>
+
+  </div>
+
+  <script type="module">
+    import { loginWithEmail, loginWithGoogle } from "/assets/js/auth.js";
+
+    window.togglePass = () => {
+      const passInp = document.getElementById('adminPassword');
+      const eye = document.getElementById('eye-icon');
+      if (passInp.type === 'password') {
+        passInp.type = 'text';
+        eye.className = 'fas fa-eye-slash text-xs';
+      } else {
+        passInp.type = 'password';
+        eye.className = 'fas fa-eye text-xs';
+      }
+    };
+
+    document.getElementById('adminLoginForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('btn-admin-login');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Memeriksa Hak Akses...';
+
+      const email = document.getElementById('adminEmail').value.trim();
+      const pass = document.getElementById('adminPassword').value;
+
+      try {
+        await loginWithEmail(email, pass);
+        window.location.replace('/admin/dashboard.html');
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Akses Ditolak',
+          text: err.message,
+          confirmButtonColor: '#dc2626'
+        });
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-key mr-1.5"></i> Autentikasi Masuk';
+      }
+    };
+
+    document.getElementById('btn-google-admin').onclick = async () => {
+      try {
+        await loginWithGoogle();
+        window.location.replace('/admin/dashboard.html');
+      } catch (err) {
+        console.warn("Google sign-in error:", err);
+      }
+    };
+  </script>
+</body>
+</html>

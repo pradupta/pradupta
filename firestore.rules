@@ -1,0 +1,82 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'hafidzsajili464@gmail.com' ||
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid))
+      );
+    }
+
+    function isAuthor() {
+      return isSignedIn() && (
+        isAdmin() ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['author', 'admin'])
+      );
+    }
+
+    // Default deny catch-all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow create: if isSignedIn() && request.auth.uid == userId;
+      allow update: if isSignedIn() && (request.auth.uid == userId || isAdmin());
+      allow delete: if isAdmin();
+    }
+
+    // Admins collection
+    match /admins/{adminId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin();
+    }
+
+    // Articles collection (Publicly readable, writable by author/admin, views can be incremented)
+    match /articles/{articleId} {
+      allow read: if true;
+      allow create: if isAuthor();
+      allow update: if isAuthor() || (
+        // Allow view incrementing by readers
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views'])
+      );
+      allow delete: if isAuthor() || isAdmin();
+    }
+
+    // Attendance collection (Created by any user/member, viewable by admin or public read if needed)
+    match /attendance/{attendanceId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Registrations collection (Created by applicant, managed by admin)
+    match /registrations/{regId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+
+    // Proker collection (Publicly readable, managed by admin/author)
+    match /proker/{prokerId} {
+      allow read: if true;
+      allow write: if isAuthor() || isAdmin();
+    }
+
+    // Config collection (Divisions & student roster)
+    match /config/{configId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+  }
+}

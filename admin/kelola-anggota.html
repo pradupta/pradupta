@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kelola Data Pendaftar Anggota - Admin ScoutDupta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <style>
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-biodata-modal, #print-biodata-modal * {
+        visibility: visible;
+      }
+      #print-biodata-modal {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        background: white !important;
+        color: black !important;
+        padding: 0;
+        margin: 0;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex antialiased">
+
+  <aside id="admin-sidebar" class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 min-h-screen hidden lg:flex"></aside>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <header id="admin-header"></header>
+
+    <main class="p-6 max-w-7xl w-full mx-auto space-y-6">
+
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 class="text-xl font-black text-white">Data Pendaftar Anggota Baru</h2>
+          <p class="text-xs text-slate-400">Verifikasi biodata calon penegak dan cetak kartu biodata resmi ScoutDupta.</p>
+        </div>
+        
+        <div class="flex gap-2">
+          <button onclick="exportAnggotaCSV()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl flex items-center gap-2 transition">
+            <i class="fas fa-file-csv"></i> Ekspor CSV
+          </button>
+          <a href="/daftar.html" target="_blank" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded-xl flex items-center gap-2 shadow-lg shadow-red-600/20 transition">
+            <i class="fas fa-user-plus"></i> Buka Form Pendaftaran
+          </a>
+        </div>
+      </div>
+
+      <!-- Filter Controls -->
+      <div class="bg-slate-900 border border-slate-800 p-4 rounded-2xl grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div class="relative">
+          <i class="fas fa-search absolute left-3.5 top-3.5 text-slate-500 text-xs"></i>
+          <input type="text" id="search-anggota" placeholder="Cari nama, email, atau no wa..." class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-3 py-2 text-xs text-white outline-none focus:border-red-500">
+        </div>
+
+        <div>
+          <select id="filter-kelas" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-red-500 font-bold">
+            <option value="Semua">Semua Tingkat Kelas</option>
+            <option value="10">Kelas 10 (Fase E)</option>
+            <option value="11">Kelas 11 (Fase F)</option>
+            <option value="12">Kelas 12 (Fase F)</option>
+          </select>
+        </div>
+
+        <div>
+          <select id="filter-status-anggota" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-white outline-none focus:border-red-500 font-bold">
+            <option value="Semua">Semua Status</option>
+            <option value="Pendaftar Baru">Pendaftar Baru</option>
+            <option value="Diterima">Diterima</option>
+            <option value="Ditolak">Ditolak</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Anggota Table -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl overflow-hidden shadow-xl">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-800/80 text-slate-400 font-extrabold uppercase text-[10px] tracking-wider border-b border-slate-800">
+              <tr>
+                <th class="p-4">Pas Foto</th>
+                <th class="p-4">Nama Lengkap</th>
+                <th class="p-4">Kelas</th>
+                <th class="p-4">Jenis Kelamin</th>
+                <th class="p-4">Kontak (WA & Email)</th>
+                <th class="p-4">Domisili</th>
+                <th class="p-4">Status</th>
+                <th class="p-4 text-center">Aksi Biodata</th>
+              </tr>
+            </thead>
+            <tbody id="anggota-tbody" class="divide-y divide-slate-800 text-slate-300">
+              <tr>
+                <td colspan="8" class="p-8 text-center text-slate-500">Memuat data pendaftar dari Firestore...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- Modal Print / Biodata Card Inspector -->
+  <div id="print-biodata-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+    <div class="bg-white text-slate-900 rounded-3xl max-w-2xl w-full p-8 shadow-2xl space-y-6 border-t-8 border-red-600 my-auto">
+      
+      <!-- Kop Surat Resmi -->
+      <div class="flex items-center justify-between border-b-2 border-red-600 pb-4">
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-2xl bg-red-600 text-white flex items-center justify-center text-2xl font-black shrink-0">
+            <i class="fas fa-campground"></i>
+          </div>
+          <div>
+            <h2 class="text-base font-black uppercase text-slate-900 tracking-tight leading-tight">GERAKAN PRAMUKA SMAN 20 KAB. TANGERANG</h2>
+            <p class="text-xs font-extrabold text-red-600 uppercase tracking-widest">Gugus Depan 20.081 - 20.082 Ambalan Raden Fatah - Cut Nyak Dien</p>
+            <p class="text-[10px] text-slate-500">Jl. Raya Pakuhaji, Kabupaten Tangerang, Banten</p>
+          </div>
+        </div>
+        <button onclick="closeBiodataModal()" class="no-print p-2 text-slate-400 hover:text-slate-600">
+          <i class="fas fa-times text-lg"></i>
+        </button>
+      </div>
+
+      <!-- Card Title -->
+      <div class="text-center">
+        <span class="inline-block px-4 py-1 rounded-full text-xs font-black bg-slate-100 text-slate-800 uppercase tracking-widest border border-slate-200">
+          FORMULIR BIODATA ANGGOTA PRAMUKA PENEGAK
+        </span>
+      </div>
+
+      <!-- Content Grid with Photo -->
+      <div class="flex flex-col sm:flex-row gap-6">
+        <div class="w-32 shrink-0 flex flex-col items-center">
+          <div class="w-32 h-44 rounded-xl overflow-hidden bg-slate-100 border-2 border-slate-300 shadow-sm">
+            <img id="card-photo" src="" class="w-full h-full object-cover">
+          </div>
+          <span id="card-status-pill" class="mt-2 text-[9px] font-black uppercase px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+            DITERIMA
+          </span>
+        </div>
+
+        <div class="flex-1 space-y-2 text-xs">
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Nama Lengkap</span>
+            <span class="col-span-2 font-black text-slate-900" id="card-name">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Nama Panggilan</span>
+            <span class="col-span-2 font-bold" id="card-nickname">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Tingkat Kelas</span>
+            <span class="col-span-2 font-bold" id="card-kelas">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Jenis Kelamin</span>
+            <span class="col-span-2 font-bold" id="card-gender">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Tempat, Tgl Lahir</span>
+            <span class="col-span-2 font-bold" id="card-ttl">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Agama</span>
+            <span class="col-span-2 font-bold" id="card-agama">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">No. WhatsApp</span>
+            <span class="col-span-2 font-bold" id="card-wa">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Email</span>
+            <span class="col-span-2 font-bold" id="card-email">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Alamat Domisili</span>
+            <span class="col-span-2 font-medium" id="card-alamat">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Hobi / Cita-cita</span>
+            <span class="col-span-2 font-medium" id="card-hobi-cita">-</span>
+          </div>
+          <div class="grid grid-cols-3 border-b border-slate-100 py-1">
+            <span class="text-slate-500 font-bold">Motto Hidup</span>
+            <span class="col-span-2 font-medium italic" id="card-motto">-</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Footer -->
+      <div class="no-print pt-4 border-t border-slate-200 flex justify-end gap-3">
+        <button onclick="window.print()" class="px-5 py-2.5 bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs rounded-xl flex items-center gap-2 shadow-lg transition">
+          <i class="fas fa-print"></i> Cetak / Simpan PDF
+        </button>
+        <button onclick="closeBiodataModal()" class="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold text-xs rounded-xl">
+          Tutup
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import { protectAdminRoute } from "/admin/js/admin-auth.js";
+    import { renderAdminLayout } from "/admin/js/admin-app.js";
+    import { db } from "/assets/js/firebase-config.js";
+    import { collection, onSnapshot, query, orderBy, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { getQueryParam, formatDateIndo } from "/assets/js/utils.js";
+
+    await protectAdminRoute();
+    renderAdminLayout('anggota');
+
+    let listAnggota = [];
+    const tbody = document.getElementById('anggota-tbody');
+    const searchInp = document.getElementById('search-anggota');
+    const filterKelas = document.getElementById('filter-kelas');
+    const filterStatus = document.getElementById('filter-status-anggota');
+
+    const q = query(collection(db, "registrations"), orderBy("createdAt", "desc"));
+    onSnapshot(q, (snapshot) => {
+      listAnggota = [];
+      snapshot.forEach(docSnap => {
+        listAnggota.push({ id: docSnap.id, ...docSnap.data() });
+      });
+      renderAnggotaTable();
+
+      // Check if URL requested specific ID
+      const directId = getQueryParam('id');
+      if (directId) {
+        const item = listAnggota.find(a => a.id === directId);
+        if (item) openBiodataModal(item);
+      }
+    });
+
+    function renderAnggotaTable() {
+      const qText = searchInp.value.toLowerCase().trim();
+      const kelasVal = filterKelas.value;
+      const statusVal = filterStatus.value;
+
+      const filtered = listAnggota.filter(a => {
+        const matchSearch = !qText || 
+          (a.nama_lengkap && a.nama_lengkap.toLowerCase().includes(qText)) ||
+          (a.email && a.email.toLowerCase().includes(qText)) ||
+          (a.no_wa && a.no_wa.includes(qText));
+        const matchKelas = kelasVal === 'Semua' || a.kelas === kelasVal;
+        const matchStatus = statusVal === 'Semua' || (a.status || 'Pendaftar Baru') === statusVal;
+        return matchSearch && matchKelas && matchStatus;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="p-8 text-center text-slate-500">
+              <i class="fas fa-users-slash text-2xl mb-2 text-slate-600 block"></i>
+              Tidak ada data anggota ditemukan.
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(a => {
+        const photoSrc = a.foto_base64 || 'https://via.placeholder.com/150';
+        const statusBadge = a.status === 'Diterima' 
+          ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+          : a.status === 'Ditolak'
+          ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+          : 'bg-amber-500/10 text-amber-400 border border-amber-500/20';
+
+        const domisiliStr = `${a.kelurahan || ''}, ${a.kecamatan || ''}, ${a.kabkota || ''}`;
+
+        return `
+          <tr class="hover:bg-slate-800/40 transition">
+            <td class="p-4">
+              <img src="${photoSrc}" class="w-10 h-12 object-cover rounded-lg bg-slate-800 border border-slate-700 shadow-sm" onerror="this.src='https://via.placeholder.com/150'">
+            </td>
+            <td class="p-4">
+              <p class="font-bold text-white">${a.nama_lengkap || '-'}</p>
+              <p class="text-[10px] text-slate-400">Panggilan: <b>${a.nama_singkat || '-'}</b></p>
+            </td>
+            <td class="p-4 font-bold text-slate-300">Kelas ${a.kelas || '-'}</td>
+            <td class="p-4 text-slate-400">${a.jenis_kelamin || '-'}</td>
+            <td class="p-4">
+              <p class="text-white font-mono font-bold">${a.no_wa || '-'}</p>
+              <p class="text-[10px] text-slate-500">${a.email || '-'}</p>
+            </td>
+            <td class="p-4 text-slate-400 max-w-xs truncate">${domisiliStr}</td>
+            <td class="p-4">
+              <span class="px-2.5 py-1 rounded-md text-[9px] font-black uppercase ${statusBadge}">
+                ${a.status || 'Pendaftar Baru'}
+              </span>
+            </td>
+            <td class="p-4 text-center">
+              <div class="inline-flex items-center gap-1.5">
+                <button onclick="openBiodataModalById('${a.id}')" class="px-3 py-1.5 rounded-lg bg-red-600/20 text-red-400 hover:bg-red-600/30 text-xs font-bold transition flex items-center gap-1.5" title="Lihat & Cetak Kartu">
+                  <i class="fas fa-id-card"></i> Kartu
+                </button>
+                <button onclick="ubahStatus('${a.id}', '${a.status || 'Pendaftar Baru'}')" class="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs transition" title="Ubah Status">
+                  <i class="fas fa-check"></i>
+                </button>
+                <button onclick="hapusAnggota('${a.id}')" class="p-1.5 rounded-lg bg-rose-600/20 text-rose-400 hover:bg-rose-600/30 text-xs transition" title="Hapus">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    searchInp.addEventListener('input', renderAnggotaTable);
+    filterKelas.addEventListener('change', renderAnggotaTable);
+    filterStatus.addEventListener('change', renderAnggotaTable);
+
+    window.openBiodataModalById = (id) => {
+      const item = listAnggota.find(a => a.id === id);
+      if (item) openBiodataModal(item);
+    };
+
+    window.openBiodataModal = (a) => {
+      document.getElementById('card-name').innerText = a.nama_lengkap || '-';
+      document.getElementById('card-nickname').innerText = a.nama_singkat || '-';
+      document.getElementById('card-kelas').innerText = `Kelas ${a.kelas || '-'} SMAN 20 Kab. Tangerang`;
+      document.getElementById('card-gender').innerText = a.jenis_kelamin || '-';
+      document.getElementById('card-ttl').innerText = `${a.tempat_lahir || '-'}, ${a.tanggal_lahir ? formatDateIndo(a.tanggal_lahir) : '-'}`;
+      document.getElementById('card-agama').innerText = a.agama || '-';
+      document.getElementById('card-wa').innerText = a.no_wa || '-';
+      document.getElementById('card-email').innerText = a.email || '-';
+      document.getElementById('card-alamat').innerText = `${a.alamat_lengkap || ''}, Kel. ${a.kelurahan || ''}, Kec. ${a.kecamatan || ''}, ${a.kabkota || ''}, ${a.provinsi || ''} ${a.kode_pos || ''}`;
+      document.getElementById('card-hobi-cita').innerText = `${a.hobi || '-'} / ${a.cita_cita || '-'}`;
+      document.getElementById('card-motto').innerText = `"${a.motto || '-'}"`;
+      document.getElementById('card-photo').src = a.foto_base64 || 'https://via.placeholder.com/150';
+      document.getElementById('card-status-pill').innerText = (a.status || 'Pendaftar Baru').toUpperCase();
+
+      document.getElementById('print-biodata-modal').classList.remove('hidden');
+    };
+
+    window.closeBiodataModal = () => {
+      document.getElementById('print-biodata-modal').classList.add('hidden');
+    };
+
+    window.ubahStatus = async (id, currentStatus) => {
+      const { value: status } = await Swal.fire({
+        title: 'Ubah Status Pendaftaran',
+        input: 'select',
+        inputOptions: {
+          'Pendaftar Baru': 'Pendaftar Baru',
+          'Diterima': 'Diterima',
+          'Ditolak': 'Ditolak'
+        },
+        inputValue: currentStatus,
+        showCancelButton: true,
+        confirmButtonColor: '#dc2626'
+      });
+
+      if (status) {
+        await updateDoc(doc(db, "registrations", id), { status });
+      }
+    };
+
+    window.hapusAnggota = async (id) => {
+      if (confirm("Hapus pendaftar ini secara permanen?")) {
+        await deleteDoc(doc(db, "registrations", id));
+      }
+    };
+
+    window.exportAnggotaCSV = () => {
+      if (listAnggota.length === 0) return alert("Belum ada data pendaftar.");
+      const headers = ["Nama Lengkap", "Nama Panggilan", "Kelas", "Jenis Kelamin", "Agama", "Email", "WhatsApp", "Alamat", "Status", "Tanggal Daftar"];
+      const rows = listAnggota.map(a => [
+        `"${a.nama_lengkap || ''}"`,
+        `"${a.nama_singkat || ''}"`,
+        `"${a.kelas || ''}"`,
+        `"${a.jenis_kelamin || ''}"`,
+        `"${a.agama || ''}"`,
+        `"${a.email || ''}"`,
+        `"${a.no_wa || ''}"`,
+        `"${(a.alamat_lengkap || '').replace(/"/g, '""')}"`,
+        `"${a.status || ''}"`,
+        `"${a.createdAt || ''}"`
+      ]);
+      const csv = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+      const uri = encodeURI(csv);
+      const link = document.createElement("a");
+      link.href = uri;
+      link.download = `Pendaftar_ScoutDupta_${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+    };
+  </script>
+</body>
+</html>

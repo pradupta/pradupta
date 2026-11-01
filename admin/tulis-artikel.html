@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tulis Artikel - Admin ScoutDupta</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="/assets/css/style.css" />
+  <style>
+    .editor-toolbar {
+      background: #0f172a;
+      border: 1px solid #1e293b;
+      border-bottom: none;
+      border-radius: 14px 14px 0 0;
+      padding: 8px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .toolbar-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: #1e293b;
+      color: #94a3b8;
+      border: 1px solid #334155;
+      font-size: 11px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .toolbar-btn:hover, .toolbar-btn:focus {
+      background: #dc2626;
+      color: #fff;
+      border-color: #dc2626;
+    }
+    #editor-content {
+      min-height: 280px;
+      background: #090d16;
+      border: 1px solid #1e293b;
+      border-radius: 0 0 14px 14px;
+      padding: 16px;
+      outline: none;
+      color: #f1f5f9;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+    #editor-content:focus {
+      border-color: #dc2626;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex antialiased">
+
+  <aside id="admin-sidebar" class="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 min-h-screen hidden lg:flex"></aside>
+
+  <div class="flex-1 flex flex-col min-w-0">
+    <header id="admin-header"></header>
+
+    <main class="p-6 max-w-4xl w-full mx-auto space-y-6">
+
+      <div class="flex justify-between items-center">
+        <div>
+          <h2 id="page-heading" class="text-xl font-black text-white">Tulis Artikel Baru</h2>
+          <p class="text-xs text-slate-400">Publikasikan warta kepramukaan secara real-time ke web ScoutDupta.</p>
+        </div>
+        <a href="/admin/kelola-berita.html" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold rounded-xl transition">
+          <i class="fas fa-list mr-1"></i> Daftar Artikel
+        </a>
+      </div>
+
+      <!-- Editor Card -->
+      <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-6 shadow-xl">
+        
+        <!-- Tab Switcher -->
+        <div class="flex border-b border-slate-800 gap-6">
+          <button type="button" onclick="switchEditorTab('write')" id="tab-write" class="pb-3 text-xs font-black border-b-2 border-red-600 text-red-500 uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-pen-nib"></i> Editor Tulis
+          </button>
+          <button type="button" onclick="switchEditorTab('preview')" id="tab-preview" class="pb-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white uppercase tracking-wider flex items-center gap-2">
+            <i class="fas fa-eye"></i> Pratinjau
+          </button>
+        </div>
+
+        <!-- Write Section -->
+        <form id="articleForm" class="space-y-4">
+          
+          <div class="grid sm:grid-cols-3 gap-4">
+            <div class="sm:col-span-2 space-y-1.5">
+              <label class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider ml-1">Judul Artikel</label>
+              <input type="text" id="art-title" class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 rounded-xl px-4 py-3 text-xs text-white outline-none transition" placeholder="Tuliskan judul berita yang menarik..." required>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider ml-1">Kategori</label>
+              <select id="art-category" class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 rounded-xl px-4 py-3 text-xs text-white outline-none transition font-bold">
+                <option value="Kegiatan">Kegiatan</option>
+                <option value="Kebijakan">Kebijakan</option>
+                <option value="Pelatihan">Pelatihan</option>
+                <option value="Prestasi">Prestasi</option>
+                <option value="Pengumuman">Pengumuman</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid sm:grid-cols-2 gap-4">
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider ml-1">Nama Penulis</label>
+              <input type="text" id="art-author" class="w-full bg-slate-950/70 border border-slate-800 rounded-xl px-4 py-3 text-xs text-slate-300 font-bold outline-none cursor-not-allowed" readonly>
+            </div>
+
+            <div class="space-y-1.5">
+              <label class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider ml-1">Dokumen PDF (Opsional Google Drive URL)</label>
+              <input type="url" id="art-pdf" class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 rounded-xl px-4 py-3 text-xs text-white outline-none transition" placeholder="https://drive.google.com/file/d/.../preview">
+            </div>
+          </div>
+
+          <!-- Featured Image Section -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider ml-1">Gambar Utama (Thumbnail)</label>
+            <div class="grid sm:grid-cols-2 gap-3 items-center">
+              <div>
+                <input type="file" id="art-file-image" accept="image/*" class="w-full text-xs text-slate-400 file:mr-3 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-slate-800 file:text-slate-200 hover:file:bg-slate-700 cursor-pointer bg-slate-950 border border-slate-800 rounded-xl p-1">
+              </div>
+              <div class="relative">
+                <input type="url" id="art-url-image" placeholder="Atau paste URL Gambar Unsplash/Web..." class="w-full bg-slate-950 border border-slate-800 focus:border-red-500 rounded-xl px-4 py-2.5 text-xs text-white outline-none transition">
+              </div>
+            </div>
+
+            <!-- Image Preview Box -->
+            <div id="image-preview-wrapper" class="hidden mt-3 p-2 bg-slate-950 border border-slate-800 rounded-2xl">
+              <img id="image-preview-elem" src="" class="max-h-48 rounded-xl mx-auto object-cover">
+            </div>
+          </div>
+
+          <!-- WYSIWYG Content Editor -->
+          <div class="space-y-1.5">
+            <label class="text-[10px] font-extrabold uppercase text-slate-400 tracking-wider ml-1">Isi Berita Lengkap</label>
+            <div class="editor-toolbar">
+              <button type="button" class="toolbar-btn" onclick="execFormat('bold')"><i class="fas fa-bold"></i> Tebal</button>
+              <button type="button" class="toolbar-btn" onclick="execFormat('italic')"><i class="fas fa-italic"></i> Miring</button>
+              <button type="button" class="toolbar-btn" onclick="execFormat('underline')"><i class="fas fa-underline"></i> Garis Bawah</button>
+              <button type="button" class="toolbar-btn" onclick="execFormat('insertUnorderedList')"><i class="fas fa-list-ul"></i> Poin List</button>
+              <button type="button" class="toolbar-btn" onclick="execFormat('insertOrderedList')"><i class="fas fa-list-ol"></i> Nomor</button>
+              <button type="button" class="toolbar-btn" onclick="insertParagraphBreak()"><i class="fas fa-paragraph"></i> Paragraf Baru</button>
+            </div>
+            <div id="editor-content" contenteditable="true">
+              <p>Tuliskan rangkaian jalannya kegiatan kepramukaan di sini...</p>
+            </div>
+          </div>
+
+          <!-- Submit Buttons -->
+          <div class="pt-4 border-t border-slate-800 flex justify-end gap-3">
+            <a href="/admin/kelola-berita.html" class="px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition">
+              Batal
+            </a>
+            <button type="submit" id="btn-publish-art" class="px-8 py-3.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-xs uppercase tracking-widest shadow-lg shadow-red-600/30 active:scale-95 transition">
+              <i class="fas fa-paper-plane mr-1.5"></i> Publikasikan Sekarang
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Live Preview Tab Section -->
+        <div id="preview-tab-wrapper" class="hidden space-y-4">
+          <div class="bg-slate-950 p-6 rounded-2xl border border-slate-800 space-y-4">
+            <span id="prev-cat" class="px-2.5 py-1 rounded-md text-[10px] font-black uppercase bg-red-600/20 text-red-400 border border-red-600/30">Kategori</span>
+            <h1 id="prev-title" class="text-2xl font-black text-white leading-tight">Judul Belum Diisi</h1>
+            <p class="text-xs text-slate-400">Oleh: <b id="prev-author" class="text-red-400">Penulis</b> | <span id="prev-date">Hari ini</span></p>
+            <img id="prev-image" src="" class="w-full max-h-72 object-cover rounded-xl hidden border border-slate-800">
+            <div id="prev-body" class="text-sm text-slate-300 leading-relaxed space-y-3 pt-3 border-t border-slate-800"></div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+
+  <script type="module">
+    import { protectAdminRoute } from "/admin/js/admin-auth.js";
+    import { renderAdminLayout } from "/admin/js/admin-app.js";
+    import { db } from "/assets/js/firebase-config.js";
+    import { collection, addDoc, doc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    import { compressImageFile, getQueryParam, formatDateIndo } from "/assets/js/utils.js";
+
+    const { user, nama } = await protectAdminRoute();
+    renderAdminLayout('tulis');
+
+    document.getElementById('art-author').value = nama || user.email;
+
+    let base64ImageString = "";
+    const editId = getQueryParam('edit');
+
+    // If edit mode, load existing article
+    if (editId) {
+      document.getElementById('page-heading').innerText = "Edit Artikel";
+      document.getElementById('btn-publish-art').innerHTML = '<i class="fas fa-save mr-1.5"></i> Simpan Perubahan';
+      loadExistingArticle(editId);
+    }
+
+    async function loadExistingArticle(id) {
+      try {
+        const snap = await getDoc(doc(db, "articles", id));
+        if (snap.exists()) {
+          const d = snap.data();
+          document.getElementById('art-title').value = d.judul || '';
+          document.getElementById('art-category').value = d.kategori || 'Kegiatan';
+          document.getElementById('art-author').value = d.penulis || nama;
+          document.getElementById('art-pdf').value = d.pdf_url || '';
+          document.getElementById('editor-content').innerHTML = d.isi_html || '';
+          if (d.gambar_url) {
+            base64ImageString = d.gambar_url;
+            document.getElementById('image-preview-elem').src = d.gambar_url;
+            document.getElementById('image-preview-wrapper').classList.remove('hidden');
+          }
+        }
+      } catch (err) {
+        console.error("Error loading article for edit:", err);
+      }
+    }
+
+    // Image file handler with compression
+    document.getElementById('art-file-image').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const comp = await compressImageFile(file, 800, 0.75);
+      base64ImageString = comp.dataUrl;
+      document.getElementById('image-preview-elem').src = comp.dataUrl;
+      document.getElementById('image-preview-wrapper').classList.remove('hidden');
+    });
+
+    document.getElementById('art-url-image').addEventListener('input', (e) => {
+      const val = e.target.value.trim();
+      if (val) {
+        base64ImageString = val;
+        document.getElementById('image-preview-elem').src = val;
+        document.getElementById('image-preview-wrapper').classList.remove('hidden');
+      }
+    });
+
+    // Formatting commands
+    window.execFormat = (cmd) => {
+      document.execCommand(cmd, false, null);
+    };
+
+    window.insertParagraphBreak = () => {
+      document.execCommand('insertParagraph', false, null);
+    };
+
+    // Tab switcher
+    window.switchEditorTab = (tab) => {
+      const tabWrite = document.getElementById('tab-write');
+      const tabPreview = document.getElementById('tab-preview');
+      const formEl = document.getElementById('articleForm');
+      const prevEl = document.getElementById('preview-tab-wrapper');
+
+      if (tab === 'write') {
+        tabWrite.className = 'pb-3 text-xs font-black border-b-2 border-red-600 text-red-500 uppercase tracking-wider flex items-center gap-2';
+        tabPreview.className = 'pb-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white uppercase tracking-wider flex items-center gap-2';
+        formEl.classList.remove('hidden');
+        prevEl.classList.add('hidden');
+      } else {
+        tabPreview.className = 'pb-3 text-xs font-black border-b-2 border-red-600 text-red-500 uppercase tracking-wider flex items-center gap-2';
+        tabWrite.className = 'pb-3 text-xs font-bold border-b-2 border-transparent text-slate-400 hover:text-white uppercase tracking-wider flex items-center gap-2';
+        formEl.classList.add('hidden');
+        prevEl.classList.remove('hidden');
+
+        document.getElementById('prev-title').innerText = document.getElementById('art-title').value || "Tanpa Judul";
+        document.getElementById('prev-cat').innerText = document.getElementById('art-category').value;
+        document.getElementById('prev-author').innerText = document.getElementById('art-author').value;
+        document.getElementById('prev-date').innerText = formatDateIndo(new Date());
+        document.getElementById('prev-body').innerHTML = document.getElementById('editor-content').innerHTML;
+
+        const prevImg = document.getElementById('prev-image');
+        if (base64ImageString) {
+          prevImg.src = base64ImageString;
+          prevImg.classList.remove('hidden');
+        } else {
+          prevImg.classList.add('hidden');
+        }
+      }
+    };
+
+    // Form submit
+    document.getElementById('articleForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const content = document.getElementById('editor-content').innerHTML.trim();
+      if (!content || content === '<p><br></p>') {
+        return Swal.fire({ icon: 'warning', title: 'Isi Kosong', text: 'Tuliskan isi artikel terlebih dahulu!', confirmButtonColor: '#dc2626' });
+      }
+
+      const btn = document.getElementById('btn-publish-art');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Menyimpan...';
+
+      const payload = {
+        judul: document.getElementById('art-title').value.trim(),
+        kategori: document.getElementById('art-category').value,
+        penulis: document.getElementById('art-author').value.trim(),
+        authorId: user.uid,
+        isi_html: content,
+        gambar_url: base64ImageString || "https://images.unsplash.com/photo-1517048676732-d65bc937f952?q=80&w=800",
+        pdf_url: document.getElementById('art-pdf').value.trim(),
+        updatedAt: new Date().toISOString()
+      };
+
+      try {
+        if (editId) {
+          await updateDoc(doc(db, "articles", editId), payload);
+          Swal.fire({
+            icon: 'success',
+            title: 'Artikel Diperbarui!',
+            text: 'Perubahan artikel berhasil disimpan.',
+            confirmButtonColor: '#dc2626'
+          }).then(() => window.location.href = '/admin/kelola-berita.html');
+        } else {
+          payload.views = 0;
+          payload.createdAt = new Date().toISOString();
+          await addDoc(collection(db, "articles"), payload);
+          Swal.fire({
+            icon: 'success',
+            title: 'Artikel Terbit!',
+            text: 'Berita telah dipublikasikan ke portal ScoutDupta.',
+            confirmButtonColor: '#dc2626'
+          }).then(() => window.location.href = '/admin/kelola-berita.html');
+        }
+      } catch (err) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Gagal Menyimpan',
+          text: err.message,
+          confirmButtonColor: '#dc2626'
+        });
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i> Publikasikan Sekarang';
+      }
+    };
+  </script>
+</body>
+</html>
