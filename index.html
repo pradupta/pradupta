@@ -8,7 +8,15 @@
   <meta property="og:title" content="ScoutDupta - Portal Pramuka SMAN 20 Kab. Tangerang" />
   <meta property="og:description" content="Sistem Informasi & Manajemen Kepramukaan ScoutDupta SMAN 20 Kabupaten Tangerang." />
   <meta property="og:type" content="website" />
-  
+  <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker Registered'))
+                    .catch(err => console.log('Service Worker Failed', err));
+            });
+        }
+    </script>
   <link rel="icon" type="image/png" href="https://pradupta.my.id/img/logo.png" />
   <link rel="apple-touch-icon" href="https://pradupta.my.id/img/logo.png" />
   <script src="https://cdn.tailwindcss.com"></script>
